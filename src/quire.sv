@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`default_nettype none
 //////////////////////////////////////////////////////////////////////////////////
 // Company: BSC
 // Engineer: Ledoux Louis
@@ -19,7 +20,20 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-import posit_defines::*;
+// prod_acc : +1 for signed +1 for overflow = +2 
+// +1 for signed scale                
+`define GET_SCALE_WIDTH( p_w, p_es, prod_acc ) \
+    (prod_acc) ? \
+        (($clog2(((2<<p_es) * (p_w-1))-1))+1) : \
+        (($clog2(((2<<p_es) * (p_w-1))-1)))
+    
+`define GET_FRACTION_WIDTH( p_w, p_es, prod_acc ) \
+    (prod_acc) ? \
+        (((p_w - p_es - 3)+1)*2) : \
+        (p_w - p_es - 3)
+
+`define GET_QUIRE_SIZE( p_w, p_es, log_nb_acc ) ((2**(p_es+2))*(p_w-2)+ 1 + log_nb_acc)
+
 
 module quire #
 (
@@ -31,29 +45,29 @@ module quire #
 (
     
     // System signals
-    input  logic clk,
-    input  logic rst_n,
+    input  wire clk,
+    input  wire rst_n,
 
     // Slave side
-    output logic rtr_o,
-    input  logic rts_i,
-    input  logic sow_i,
-    input  logic eow_i,
-    input  logic [(`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] fraction,
-    input  logic signed [(`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] scale,
-    input  logic sign_i,
-    input  logic zero_i,
-    input  logic NaR_i,
+    output reg rtr_o,
+    input  wire rts_i,
+    input  wire sow_i,
+    input  wire eow_i,
+    input  wire [(`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] fraction,
+    input  wire signed [(`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] scale,
+    input  wire sign_i,
+    input  wire zero_i,
+    input  wire NaR_i,
     
     // Master side
-    input  logic rtr_i,
-    output logic rts_o,
-    output logic eow_o,
-    output logic sow_o,
-    output logic [`GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM)-1:0] data_o,
-    output logic NaR_o,
-    output logic sign_o,
-    output logic zero_o
+    input  wire rtr_i,
+    output reg rts_o,
+    output reg eow_o,
+    output reg sow_o,
+    output reg [`GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM)-1:0] data_o,
+    output reg NaR_o,
+    output reg sign_o,
+    output reg zero_o
 
 );
 
@@ -74,35 +88,35 @@ localparam integer bias_sf_mult = (2**(es+1))*(posit_width-2);
 
 
 // signal state control
-logic process_en;
-logic receive_en;
-logic rtr_o_int;
-logic rts_o_int;
+wire process_en;
+wire receive_en;
+wire rtr_o_int;
+wire rts_o_int;
 
 // signal latched inputs
-logic latched;
-logic latched_zero_i;
-logic latched_NaR_i;
-logic latched_sign_i;
-logic latched_sow_i;
-logic latched_eow_i;
-logic [FRACTION_WIDTH-1:0] latched_fraction;
-logic signed [SCALE_WIDTH-1:0]  latched_scale;
+wire latched;
+wire latched_zero_i;
+wire latched_NaR_i;
+wire latched_sign_i;
+wire latched_sow_i;
+wire latched_eow_i;
+reg [FRACTION_WIDTH-1:0] latched_fraction;
+reg signed [SCALE_WIDTH-1:0]  latched_scale;
 
-logic zero_in;
-logic NaR_in;
-logic sign_in;
-logic [FRACTION_WIDTH-1:0] fraction_in;
-logic signed [SCALE_WIDTH-1:0]  scale_in;
+wire zero_in;
+wire NaR_in;
+wire sign_in;
+wire [FRACTION_WIDTH-1:0] fraction_in;
+wire signed [SCALE_WIDTH-1:0]  scale_in;
 
 // pipeline control signals
 localparam integer PIPELEN = 2;
-logic [PIPELEN-1:0] stage_en;
-logic [PIPELEN-1:0] stage_clr;
-logic [PIPELEN-1:0] staged;
+reg [PIPELEN-1:0] stage_en;
+reg [PIPELEN-1:0] stage_clr;
+reg [PIPELEN-1:0] staged;
 
-logic [PIPELEN:0] sow;
-logic [PIPELEN:0] eow;
+reg [PIPELEN:0] sow;
+reg [PIPELEN:0] eow;
 
 // Shift condition: downstream module ready for receive, 
 // or current module not ready to send
@@ -118,7 +132,7 @@ assign receive_en = rts_i & rtr_o_int;
 //  ___/ / / /_/ /| |/ /  __/
 // /____/_/\__,_/ |___/\___/ 
 
-always_ff @( posedge clk or negedge rst_n ) begin
+always @( posedge clk or negedge rst_n ) begin
     if ( ~rst_n ) begin
         latched <= 0;
         latched_zero_i <= 0;
@@ -175,13 +189,13 @@ assign stage_en[0] = process_en & ( receive_en | latched );
 // clear first stage when pipeline works and upstream module is unable to provide data and no latched data present
 assign stage_clr[0] = process_en & ( ~receive_en & ~latched );
 
-logic signed [QUIRE_SIZE-1:0] shift_register;
-logic sign_r1, NaR_r1, zero_r1, RaZ_r1;
-logic [FRACTION_WIDTH:0] frac_hidden; // not -1 because of hidden bit
+reg signed [QUIRE_SIZE-1:0] shift_register;
+reg sign_r1, NaR_r1, zero_r1, RaZ_r1;
+reg [FRACTION_WIDTH:0] frac_hidden; // not -1 because of hidden bit
 
 assign frac_hidden = {1'b1, fraction_in};
 
-always_ff @( posedge clk or negedge rst_n ) begin
+always @( posedge clk or negedge rst_n ) begin
     if ( ~rst_n ) begin
          staged[0]   <= 0;
          sow[1]      <= 0;
@@ -224,10 +238,10 @@ end
 assign stage_en[1]  =  staged[0] & process_en;
 assign stage_clr[1] = ~staged[0] & process_en;
 
-logic signed [QUIRE_SIZE-1:0] quire_r;
-logic  NaR_r2;
+reg signed [QUIRE_SIZE-1:0] quire_r;
+reg  NaR_r2;
 
-always_ff @( posedge clk or negedge rst_n ) begin
+always @( posedge clk or negedge rst_n ) begin
     if ( ~rst_n ) begin
          staged[1] <= 0;
          sow[2]    <= 0;
@@ -281,3 +295,4 @@ assign NaR_o     = NaR_r2; // TODO
 assign zero_o    = ~|quire_r;
 
 endmodule
+`default_nettype wire
