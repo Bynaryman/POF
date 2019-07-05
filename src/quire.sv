@@ -19,6 +19,8 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
+`define COVER
+`define FORMAL 
 
 // prod_acc : +1 for signed +1 for overflow = +2 
 // +1 for signed scale                
@@ -37,10 +39,10 @@
 
 module quire #
 (
-    parameter integer POSIT_WIDTH = 16,
-    parameter integer POSIT_ES = 1,
+    parameter integer POSIT_WIDTH = 8,
+    parameter integer POSIT_ES = 0,
     parameter integer LOG_NB_ACCUM = 15,
-    parameter integer IS_PROD_ACCUM = 0
+    parameter integer IS_PROD_ACCUM = 1
 )
 (
     
@@ -294,5 +296,35 @@ assign sign_o    = quire_r[QUIRE_SIZE-1];
 assign NaR_o     = NaR_r2; // TODO
 assign zero_o    = ~|quire_r;
 
+//    ____                           __
+//   / __/___  _________ ___  ____ _/ /
+//  / /_/ __ \/ ___/ __ `__ \/ __ `/ / 
+// / __/ /_/ / /  / / / / / / /_/ / /  
+///_/  \____/_/  /_/ /_/ /_/\__,_/_/   
+
+`ifdef	FORMAL
+    //set f_past_valid
+    reg f_past_valid ;
+    initial f_past_valid = 1'b0;
+    always@( posedge clk )
+        f_past_valid = 1'b1;
+    //start with rst
+    //always @(*)
+	//	if(!f_past_valid)
+    //        assume(0 == rst_n);
+    //start close to desired value
+    always @(*) begin
+		if(!f_past_valid) begin
+            assume(40'h0000100000 == quire_r);
+            assume(40'h0000005000 >= shift_register);
+        end
+    end
+    //test trace
+    `ifdef COVER	
+    always@( posedge clk )
+        cover((quire_r==40'h0001200001)&&f_past_valid );
+    `endif
+`endif
 endmodule
+
 `default_nettype wire

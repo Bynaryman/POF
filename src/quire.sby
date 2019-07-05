@@ -1,0 +1,12 @@
+[options]
+mode cover
+depth 2000
+[engines]
+smtbmc
+
+[script]
+read_verilog -formal quire.sv
+prep -top quire
+
+[files]
+quire.sv
