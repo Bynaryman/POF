@@ -49,7 +49,7 @@ module quire #
     input  wire rst_n,
 
     // Slave side
-    output reg rtr_o,
+    output wire rtr_o,
     input  wire rts_i,
     input  wire sow_i,
     input  wire eow_i,
@@ -61,13 +61,13 @@ module quire #
     
     // Master side
     input  wire rtr_i,
-    output reg rts_o,
-    output reg eow_o,
-    output reg sow_o,
-    output reg [`GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM)-1:0] data_o,
-    output reg NaR_o,
-    output reg sign_o,
-    output reg zero_o
+    output wire rts_o,
+    output wire eow_o,
+    output wire sow_o,
+    output wire [`GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM)-1:0] data_o,
+    output wire NaR_o,
+    output wire sign_o,
+    output wire zero_o
 
 );
 
@@ -90,16 +90,16 @@ localparam integer bias_sf_mult = (2**(es+1))*(posit_width-2);
 // signal state control
 wire process_en;
 wire receive_en;
-wire rtr_o_int;
+reg rtr_o_int;
 wire rts_o_int;
 
 // signal latched inputs
-wire latched;
-wire latched_zero_i;
-wire latched_NaR_i;
-wire latched_sign_i;
-wire latched_sow_i;
-wire latched_eow_i;
+reg latched;
+reg latched_zero_i;
+reg latched_NaR_i;
+reg latched_sign_i;
+reg latched_sow_i;
+reg latched_eow_i;
 reg [FRACTION_WIDTH-1:0] latched_fraction;
 reg signed [SCALE_WIDTH-1:0]  latched_scale;
 
@@ -111,8 +111,8 @@ wire signed [SCALE_WIDTH-1:0]  scale_in;
 
 // pipeline control signals
 localparam integer PIPELEN = 2;
-reg [PIPELEN-1:0] stage_en;
-reg [PIPELEN-1:0] stage_clr;
+wire [PIPELEN-1:0] stage_en;
+wire [PIPELEN-1:0] stage_clr;
 reg [PIPELEN-1:0] staged;
 
 reg [PIPELEN:0] sow;
@@ -191,7 +191,7 @@ assign stage_clr[0] = process_en & ( ~receive_en & ~latched );
 
 reg signed [QUIRE_SIZE-1:0] shift_register;
 reg sign_r1, NaR_r1, zero_r1, RaZ_r1;
-reg [FRACTION_WIDTH:0] frac_hidden; // not -1 because of hidden bit
+wire [FRACTION_WIDTH:0] frac_hidden; // not -1 because of hidden bit
 
 assign frac_hidden = {1'b1, fraction_in};
 
