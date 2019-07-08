@@ -1,4 +1,5 @@
 `timescale 1ns / 1ps
+`default_nettype none
 //////////////////////////////////////////////////////////////////////////////////
 // Company: BSC
 // Engineer: Ledoux Louis
@@ -23,30 +24,30 @@ import posit_defines::*;
 
 module quire #
 (
-    parameter integer POSIT_WIDTH = 16,
-    parameter integer POSIT_ES = 1,
+    parameter integer POSIT_WIDTH = 8,
+    parameter integer POSIT_ES = 0,
     parameter integer LOG_NB_ACCUM = 15,
-    parameter integer IS_PROD_ACCUM = 0
+    parameter integer IS_PROD_ACCUM = 1
 )
 (
     
     // System signals
-    input  logic clk,
-    input  logic rst_n,
+    input  wire clk,
+    input  wire rst_n,
 
     // Slave side
     output logic rtr_o,
-    input  logic rts_i,
-    input  logic sow_i,
-    input  logic eow_i,
-    input  logic [(`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] fraction,
-    input  logic signed [(`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] scale,
-    input  logic sign_i,
-    input  logic zero_i,
-    input  logic NaR_i,
+    input  wire rts_i,
+    input  wire sow_i,
+    input  wire eow_i,
+    input  wire [(`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] fraction,
+    input  wire signed [(`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] scale,
+    input  wire sign_i,
+    input  wire zero_i,
+    input  wire NaR_i,
     
     // Master side
-    input  logic rtr_i,
+    input  wire rtr_i,
     output logic rts_o,
     output logic eow_o,
     output logic sow_o,
@@ -281,3 +282,4 @@ assign NaR_o     = NaR_r2; // TODO
 assign zero_o    = ~|quire_r;
 
 endmodule
+`default_nettype wire
