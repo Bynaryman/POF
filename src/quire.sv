@@ -23,10 +23,10 @@ import posit_defines::*;
 
 module quire #
 (
-    parameter integer POSIT_WIDTH = 16,
-    parameter integer POSIT_ES = 1,
+    parameter integer POSIT_WIDTH = 8,
+    parameter integer POSIT_ES = 0,
     parameter integer LOG_NB_ACCUM = 15,
-    parameter integer IS_PROD_ACCUM = 0
+    parameter integer IS_PROD_ACCUM = 1
 )
 (
     
