@@ -155,7 +155,7 @@ for (positron_i = 0 ; positron_i < NB_POSITRON ; positron_i++) begin
         .WEIGHTS_BASE_PATH    ( WEIGHTS_BASE_PATH            ),
         .WEIGHTS_FILE_NUMBER  ( `GENVAR_TO_ASCII(positron_i) ),
         .NB_UPSTREAM_POSITRON ( NB_UPSTREAM_POSITRON         ),
-        .LOG_NB_ACCUM         ( 15 /*$clog2(NB_UPSTREAM_POSITRON)*/ )  // handle at least all the accumulation of previous layer
+        .LOG_NB_ACCUM         ( $clog2(NB_UPSTREAM_POSITRON) )  // handle at least all the accumulation of previous layer
     )
     positron_inst(
     
