@@ -95,8 +95,7 @@ always @(posedge clk or negedge rst_n) begin
         rts_i_r <= rts_i;
     end
 end
-assign fake_sow_i = rts_i & ~rts_i_r;
-    
+assign fake_sow_i = ( wc == 0 ) & rts_i;
 
 // wc logic
 // count from [0;NB_UPSTREAM_POSITRON-1] -> NB_UPSTREAM_POSITRON values
