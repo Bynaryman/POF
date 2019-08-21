@@ -22,21 +22,21 @@
 
 import posit_defines::*;
 
-module posit_mult_4_0 #
+module posit_mult_4_0
 (
 
     // SLAVE SIDE
     
     // input posit 1
     input wire fraction_i1,
-    input wire signed [3:0] scale_i1,
+    input wire signed [2:0] scale_i1,
     input wire NaR_i1,
     input wire zero_i1,
     input wire sign_i1,
    
     // input posit 2
     input wire fraction_i2,
-    input wire signed [3:0] scale_i2,
+    input wire signed [2:0] scale_i2,
     input wire NaR_i2,
     input wire zero_i2,
     input wire sign_i2,
