@@ -221,7 +221,7 @@ weights_ROM_inst (
    // MASTER SIDE
            
    // control signals
-   .rtr_i     ( posit_mult_ready    ),
+   .rtr_i     ( quire_ready         ),
    .rts_o     ( weights_rom_valid   ),
    .eow_o     ( weights_rom_eow_o   ),
    .sow_o     ( weights_rom_sow_o   ),
@@ -260,7 +260,7 @@ pipeline_inst(
     // MASTER SIDE
             
     // control signals
-    .rtr_i  ( posit_mult_ready       ),
+    .rtr_i  ( quire_ready            ),
     .rts_o  ( pipeline_delay_valid   ),
     .eow_o  ( pipeline_delay_eow_o   ),
     .sow_o  ( pipeline_delay_sow_o   ),
@@ -317,55 +317,55 @@ extract_input_positron(
 //  / ____/ /_/ (__  ) / /_   / /  / / /_/ / / /_  
 // /_/    \____/____/_/\__/  /_/  /_/\__,_/_/\__/  
 
-posit_mult #
-(
-    .POSIT_WIDTH ( POSIT_WIDTH ),
-    .POSIT_ES    ( POSIT_ES    )
-)
-posit_mult_inst (
-
-    // System signals
-    .clk   ( clk                         ),
-    .rst_n ( rst_n                       ),
-    
-    // SLAVE SIDE
-    
-    // control signals
-    .rtr_o ( posit_mult_ready            ),
-    .rts_i ( weights_rom_valid           ),
-    .sow_i ( weights_rom_sow_o           ),
-    .eow_i ( weights_rom_eow_o           ),
-    
-    // input posit 1
-    .fraction_i1 ( fraction_input        ),
-    .scale_i1    ( scale_input           ),
-    .NaR_i1      ( NaR_input             ),
-    .zero_i1     ( zero_input            ),
-    .sign_i1     ( sign_input            ),
-   
-    // input posit 2
-    .fraction_i2 ( fraction_weight       ),
-    .scale_i2    ( scale_weight          ),
-    .NaR_i2      ( NaR_weight            ),
-    .zero_i2     ( zero_weight           ),
-    .sign_i2     ( sign_weight           ),
-    
-    // MASTER SIDE
-    
-    // control signals
-    .rtr_i       ( quire_ready           ),
-    .rts_o       ( posit_mult_valid      ),
-    .eow_o       ( posit_mult_eow_o      ),
-    .sow_o       ( posit_mult_sow_o      ),
-    
-    // output posit
-    .fraction_o  ( posit_mult_fraction_o ), 
-    .scale_o     ( posit_mult_scale_o    ),
-    .NaR_o       ( posit_mult_NaR_o      ),
-    .sign_o      ( posit_mult_sign_o     ),
-    .zero_o      ( posit_mult_zero_o     )
-
-);
+// posit_mult #
+// (
+//     .POSIT_WIDTH ( POSIT_WIDTH ),
+//     .POSIT_ES    ( POSIT_ES    )
+// )
+// posit_mult_inst (
+// 
+//     // System signals
+//     .clk   ( clk                         ),
+//     .rst_n ( rst_n                       ),
+//     
+//     // SLAVE SIDE
+//     
+//     // control signals
+//     .rtr_o ( posit_mult_ready            ),
+//     .rts_i ( weights_rom_valid           ),
+//     .sow_i ( weights_rom_sow_o           ),
+//     .eow_i ( weights_rom_eow_o           ),
+//     
+//     // input posit 1
+//     .fraction_i1 ( fraction_input        ),
+//     .scale_i1    ( scale_input           ),
+//     .NaR_i1      ( NaR_input             ),
+//     .zero_i1     ( zero_input            ),
+//     .sign_i1     ( sign_input            ),
+//    
+//     // input posit 2
+//     .fraction_i2 ( fraction_weight       ),
+//     .scale_i2    ( scale_weight          ),
+//     .NaR_i2      ( NaR_weight            ),
+//     .zero_i2     ( zero_weight           ),
+//     .sign_i2     ( sign_weight           ),
+//     
+//     // MASTER SIDE
+//     
+//     // control signals
+//     .rtr_i       ( quire_ready           ),
+//     .rts_o       ( posit_mult_valid      ),
+//     .eow_o       ( posit_mult_eow_o      ),
+//     .sow_o       ( posit_mult_sow_o      ),
+//     
+//     // output posit
+//     .fraction_o  ( posit_mult_fraction_o ), 
+//     .scale_o     ( posit_mult_scale_o    ),
+//     .NaR_o       ( posit_mult_NaR_o      ),
+//     .sign_o      ( posit_mult_sign_o     ),
+//     .zero_o      ( posit_mult_zero_o     )
+// 
+// );
 
 posit_mult_4_0 posit_mult_inst (
 
@@ -388,11 +388,11 @@ posit_mult_4_0 posit_mult_inst (
     // MASTER SIDE
     
     // output posit
-    .fraction_o  (  ), 
-    .scale_o     (  ),
-    .NaR_o       (  ),
-    .sign_o      (  ),
-    .zero_o      (  )
+    .fraction_o  ( posit_mult_fraction_o ), 
+    .scale_o     ( posit_mult_scale_o    ),
+    .NaR_o       ( posit_mult_NaR_o      ),
+    .sign_o      ( posit_mult_sign_o     ),
+    .zero_o      ( posit_mult_zero_o     )
 
 );
 
@@ -417,9 +417,9 @@ quire_prod_accum_inst (
 
     // Slave side
     .rtr_o    ( quire_ready           ),
-    .rts_i    ( posit_mult_valid      ),
-    .sow_i    ( posit_mult_sow_o      ),
-    .eow_i    ( posit_mult_eow_o      ),
+    .rts_i    ( weights_rom_valid     ),
+    .sow_i    ( weights_rom_sow_o     ),
+    .eow_i    ( weights_rom_eow_o     ),
     .fraction ( posit_mult_fraction_o ),
     .scale    ( posit_mult_scale_o    ),
     .sign_i   ( posit_mult_sign_o     ),
