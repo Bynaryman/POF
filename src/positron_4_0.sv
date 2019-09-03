@@ -105,11 +105,11 @@ module positron_4_0#
 
 // local parameters
 localparam integer DELAY_READ_ROM = 2;
-localparam integer FRACTION_WIDTH_BEFORE_MULT = (`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, 0));
-localparam integer SCALE_WIDTH_BEFORE_MULT    = (`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, 0));
-localparam integer FRACTION_WIDTH_AFTER_MULT  = (`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, 1));
-localparam integer SCALE_WIDTH_AFTER_MULT     = (`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, 1));
-localparam integer QUIRE_WIDTH                = (`GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM));
+localparam integer FRACTION_WIDTH_BEFORE_MULT = 2;
+localparam integer SCALE_WIDTH_BEFORE_MULT    = 3;
+localparam integer FRACTION_WIDTH_AFTER_MULT  = 4; // 2*2
+localparam integer SCALE_WIDTH_AFTER_MULT     = 3; // does not grow since es=0, and never overflow
+localparam integer QUIRE_WIDTH                = 19; // recompute TODO
 
 // signals
 
@@ -402,7 +402,7 @@ posit_mult_4_0 posit_mult_inst (
 // / /_/ / /_/ / / /  /  __/
 // \___\_\__,_/_/_/   \___/ 
 
-quire #
+quire_4_0 #
 (
     .POSIT_WIDTH   ( POSIT_WIDTH  ),
     .POSIT_ES      ( POSIT_ES     ),

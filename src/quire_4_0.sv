@@ -22,10 +22,8 @@
 
 import posit_defines::*;
 
-module quire #
+module quire_4_0 #
 (
-    parameter integer POSIT_WIDTH = 4,
-    parameter integer POSIT_ES = 0,
     parameter integer LOG_NB_ACCUM = 10,
     parameter integer IS_PROD_ACCUM = 1
 )
@@ -40,8 +38,8 @@ module quire #
     input  wire rts_i,
     input  wire sow_i,
     input  wire eow_i,
-    input  wire [(`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] fraction,
-    input  wire signed [(`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM))-1:0] scale,
+    input  wire [3:0] fraction,
+    input  wire signed [2:0] scale,
     input  wire sign_i,
     input  wire zero_i,
     input  wire NaR_i,
@@ -51,7 +49,7 @@ module quire #
     output logic rts_o,
     output logic eow_o,
     output logic sow_o,
-    output logic [`GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM)-1:0] data_o,
+    output logic [18:0] data_o,
     output logic NaR_o,
     output logic sign_o,
     output logic zero_o
