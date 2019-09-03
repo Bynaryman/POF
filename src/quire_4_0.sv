@@ -62,8 +62,8 @@ localparam integer FRACTION_WIDTH = 4;
 localparam integer SCALE_WIDTH    = 3;
 
 // localparam to compute size binary point offsets
-localparam integer es = POSIT_ES;
-localparam integer posit_width = POSIT_WIDTH;
+localparam integer es = 0;
+localparam integer posit_width = 4;
 localparam integer nqmin = (2**(es+2))*(posit_width-2)+1;
 localparam integer log_nb_accum = LOG_NB_ACCUM;
 localparam integer nq = nqmin + log_nb_accum;
