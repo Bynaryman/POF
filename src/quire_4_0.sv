@@ -57,9 +57,9 @@ module quire_4_0 #
 );
 
 // localparam for size of internal registers
-localparam integer QUIRE_SIZE     = `GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM);
-localparam integer FRACTION_WIDTH = `GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM);
-localparam integer SCALE_WIDTH    = `GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, IS_PROD_ACCUM);
+localparam integer QUIRE_SIZE     = 19;
+localparam integer FRACTION_WIDTH = 4;
+localparam integer SCALE_WIDTH    = 3;
 
 // localparam to compute size binary point offsets
 localparam integer es = POSIT_ES;
