@@ -217,7 +217,7 @@ end
 wire [8:0] test;
 signed_shift_lut 
 signed_shift_lut_inst (
-    .clk ( clk  )
+    .clk ( clk  ),
     .in  ( { fraction_in[3], fraction_in[1], scale_in} ),
     .out ( test )
 );
