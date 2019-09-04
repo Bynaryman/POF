@@ -103,6 +103,8 @@ assign receive_en = rts_i & rtr_o_int;
 always_ff @(posedge clk) rtr_o_int <= process_en;
 
 assign rtr_o = rtr_o_int;
+assign eow[0] = eow_i;
+assign sow[0] = sow_i;
 
 //     ____  _            ___          
 //    / __ \(_)___  ___  / (_)___  ___ 
