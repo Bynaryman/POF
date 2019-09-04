@@ -416,23 +416,23 @@ quire_prod_accum_inst (
     .rst_n    ( rst_n                 ),
 
     // Slave side
-    .rtr_o    ( quire_ready           ),
-    .rts_i    ( weights_rom_valid     ),
-    .sow_i    ( weights_rom_sow_o     ),
-    .eow_i    ( weights_rom_eow_o     ),
-    .fraction ( posit_mult_fraction_o ),
-    .scale    ( posit_mult_scale_o    ),
-    .sign_i   ( posit_mult_sign_o     ),
-    .zero_i   ( posit_mult_zero_o     ),
-    .NaR_i    ( posit_mult_NaR_o      ),
+    .rtr_o      ( quire_ready           ),
+    .rts_i      ( weights_rom_valid     ),
+    .sow_i      ( weights_rom_sow_o     ),
+    .eow_i      ( weights_rom_eow_o     ),
+    .fraction_i ( posit_mult_fraction_o ),
+    .scale_i    ( posit_mult_scale_o    ),
+    .sign_i     ( posit_mult_sign_o     ),
+    .zero_i     ( posit_mult_zero_o     ),
+    .NaR_i      ( posit_mult_NaR_o      ),
     
     // Master side
-    .rtr_i    ( rtr_i                 ),
-    .rts_o    ( quire_valid           ),
-    .eow_o    ( quire_eow_o           ),
-    .sow_o    ( quire_sow_o           ),
-    .data_o   ( quire_data_o          ),
-    .NaR_o    ( quire_NaR_o           )
+    .rtr_i      ( rtr_i                 ),
+    .rts_o      ( quire_valid           ),
+    .eow_o      ( quire_eow_o           ),
+    .sow_o      ( quire_sow_o           ),
+    .data_o     ( quire_data_o          ),
+    .NaR_o      ( quire_NaR_o           )
 
 );
 
