@@ -214,9 +214,10 @@ always_ff @( posedge clk or negedge rst_n ) begin
     end
 end
 
-wire test;
+wire [8:0] test;
 signed_shift_lut 
 signed_shift_lut_inst (
+    .clk ( clk  )
     .in  ( { fraction_in[3], fraction_in[1], scale_in} ),
     .out ( test )
 );
