@@ -218,7 +218,7 @@ wire [8:0] test1;
 shift_module # (
     .DATA_WIDTH_A ( 5 ),
     .DATA_WIDTH_B ( 4 ),
-    .DATA_WIDTH_C ( 9 ),    
+    .DATA_WIDTH_C ( 9 )    
 ) shift_module_inst (
     .a ( frac_hidden ),
     .b ( scale_in    ),
@@ -233,7 +233,7 @@ signed_shift_lut_inst (
     .out ( test2 )
 );
 
-$assert(test2 == shift_register);
+// $assert(test2 == shift_register);
 
 //    ___ 
 //   |__ \
