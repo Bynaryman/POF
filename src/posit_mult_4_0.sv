@@ -46,7 +46,7 @@ module posit_mult_4_0
     
     // output posit
     output logic [3:0] fraction_o,
-    output logic signed [2:0] scale_o,
+    output logic signed [3:0] scale_o,
     output logic NaR_o,
     output logic sign_o,
     output logic zero_o

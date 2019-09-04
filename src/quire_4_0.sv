@@ -39,7 +39,7 @@ module quire_4_0 #
     input  wire sow_i,
     input  wire eow_i,
     input  wire [3:0] fraction,
-    input  wire signed [2:0] scale,
+    input  wire signed [3:0] scale,
     input  wire sign_i,
     input  wire zero_i,
     input  wire NaR_i,
@@ -59,17 +59,17 @@ module quire_4_0 #
 // localparam for size of internal registers
 localparam integer QUIRE_SIZE     = 19;
 localparam integer FRACTION_WIDTH = 4;
-localparam integer SCALE_WIDTH    = 3;
+localparam integer SCALE_WIDTH    = 4;
 
 // localparam to compute size binary point offsets
 localparam integer es = 0;
 localparam integer posit_width = 4;
-localparam integer nqmin = (2**(es+2))*(posit_width-2)+1;
+localparam integer nqmin = (2**(es+2))*(posit_width-2)+1; //4*2+1=9
 localparam integer log_nb_accum = LOG_NB_ACCUM;
-localparam integer nq = nqmin + log_nb_accum;
-localparam integer binary_point_position = (nqmin-1)/2;
-localparam integer bpp_lsb = binary_point_position - FRACTION_WIDTH;
-localparam integer bias_sf_mult = (2**(es+1))*(posit_width-2);
+localparam integer nq = nqmin + log_nb_accum; // 19
+localparam integer binary_point_position = (nqmin-1)/2; // 4
+localparam integer bpp_lsb = binary_point_position - FRACTION_WIDTH; // 4-4=0
+localparam integer bias_sf_mult = (2**(es+1))*(posit_width-2); //2*2=4
 
 
 // signal state control
@@ -213,6 +213,13 @@ always_ff @( posedge clk or negedge rst_n ) begin
         end
     end
 end
+
+wire test;
+signed_shift_lut 
+signed_shift_lut_inst (
+    .in  ( { fraction_in[3], fraction_in[1], scale_in} ),
+    .out ( test )
+);
 
 //    ___ 
 //   |__ \
