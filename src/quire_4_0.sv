@@ -24,6 +24,7 @@ import posit_defines::*;
 
 module quire_4_0 #
 (
+    parameter integer USE_DSP48 = 1,  // use dsp for the accum if 1, logic otherwise
     parameter integer LOG_NB_ACCUM = 10,
     parameter integer IS_PROD_ACCUM = 1
 )
@@ -200,12 +201,34 @@ end
 //  / __/ 
 // /____/ 
 
+
+wire signed [19:0] accum = 0;
+
+generate
+if ( USE_DSP48 == 1) begin
+    addsub_dsp48 addsub_dsp48_inst (
+        .A   ( accum   ), // input wire [19 : 0] A
+        .B   ( shifted ), // input wire [8 : 0] B
+        .ADD ( sign_r1 ), // input wire ADD
+        .S   ( accum   )  // output wire [19 : 0] S
+    );
+end
+else begin
+    addsub_logic addsub_logic (
+        .A   ( accum   ), // input wire [19 : 0] A
+        .B   ( shifted ), // input wire [8 : 0] B
+        .ADD ( sign_r1 ), // input wire ADD
+        .S   ( accum   )  // output wire [19 : 0] S
+    );
+end
+endgenerate
+
+
 assign stage_en[1]  =  staged[0] & process_en;
 assign stage_clr[1] = ~staged[0] & process_en;
 
 logic signed [QUIRE_SIZE-1:0] quire_r;
 logic  NaR_r2;
-
 always_ff @( posedge clk ) begin
     if ( ~rst_n ) begin
          staged[1] <= 0;
@@ -243,6 +266,46 @@ always_ff @( posedge clk ) begin
         end
     end
 end
+
+
+
+// always_ff @( posedge clk ) begin
+//     if ( ~rst_n ) begin
+//          staged[1] <= 0;
+//          sow[2]    <= 0;
+//          eow[2]    <= 0;
+//          quire_r   <= 0;
+//          NaR_r2    <= 0; 
+//     end
+//     else begin
+//         if ( stage_en[1] ) begin
+//             staged[1] <= 1;
+//             sow[2]    <= sow[1];
+//             eow[2]    <= eow[1];
+//             if ( ~NaR_r1 ) begin
+//                 if ( ~zero_r1 ) begin
+//                     if ( sow[1] ) begin //sow
+//                         quire_r   <= (sign_r1) ?  - shifted :
+//                                                   + shifted ;
+//                     end
+//                     else begin
+//                         quire_r   <= (sign_r1) ?  quire_r - shifted :
+//                                                   quire_r + shifted ;
+//                     end
+//                 end
+//                 else begin
+//                    if ( sow[1] ) begin // sow and zero
+//                        quire_r <= 0;
+//                    end
+//                 end
+//             end
+//             NaR_r2 <= NaR_r1; // TODO
+//         end
+//         else if ( stage_clr[1] ) begin
+//             staged[1] <= 0;
+//         end
+//     end
+// end
 
 //                          __           
 //    ____ ___  ____ ______/ /____  _____
