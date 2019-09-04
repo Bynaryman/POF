@@ -103,6 +103,12 @@ logic [PIPELEN-1:0] staged;
 logic [PIPELEN:0] sow;
 logic [PIPELEN:0] eow;
 
+//    _____ __               
+//   / ___// /___ __   _____ 
+//   \__ \/ / __ `/ | / / _ \
+//  ___/ / / /_/ /| |/ /  __/
+// /____/_/\__,_/ |___/\___/ 
+
 // Shift condition: downstream module ready for receive, 
 // or current module not ready to send
 assign process_en = rtr_i | ~rts_o_int;
@@ -111,40 +117,8 @@ assign process_en = rtr_i | ~rts_o_int;
 // and upstream module ready to send
 assign receive_en = rts_i & rtr_o_int;
 
-//    _____ __               
-//   / ___// /___ __   _____ 
-//   \__ \/ / __ `/ | / / _ \
-//  ___/ / / /_/ /| |/ /  __/
-// /____/_/\__,_/ |___/\___/ 
+always_ff @(posedge clk) rtr_o_int <= process_en;
 
-always_ff @( posedge clk or negedge rst_n ) begin
-    if ( ~rst_n ) begin
-        latched <= 0;
-        latched_zero_i <= 0;
-        latched_sign_i <= 0;
-        latched_NaR_i <= 0;
-        latched_sow_i <= 0;
-        latched_eow_i <= 0;
-        latched_fraction <= 0;
-        latched_scale <= 0;
-    end
-    else begin
-       if ( receive_en & ~process_en ) begin
-           latched <= 1;
-           latched_NaR_i <= NaR_i;
-           latched_zero_i <= zero_i;
-           latched_sow_i <= sow_i;
-           latched_eow_i <= eow_i;
-           latched_sign_i <= sign_i;
-           latched_fraction <= fraction;
-           latched_scale <= scale;
-       end
-       else if ( process_en ) begin
-           latched <= 0;
-       end
-       rtr_o_int <= process_en;
-    end
-end
 assign rtr_o = rtr_o_int;
 
 //     ____  _            ___          
@@ -154,15 +128,6 @@ assign rtr_o = rtr_o_int;
 // /_/   /_/ .___/\___/_/_/_/ /_/\___/ 
 //        /_/                          
 
-// mux to select latched data if present
-assign fraction_in = (latched)? latched_fraction : fraction;
-assign scale_in    = (latched)? latched_scale    : scale;
-assign sign_in     = (latched)? latched_sign_i   : sign_i;
-assign NaR_in      = (latched)? latched_NaR_i    : NaR_i;
-assign zero_in     = (latched)? latched_zero_i   : zero_i;
-assign sow[0]      = (latched)? latched_sow_i    : sow_i;
-assign eow[0]      = (latched)? latched_eow_i    : eow_i;
-
 //    ___
 //   <  /
 //   / / 
@@ -170,40 +135,36 @@ assign eow[0]      = (latched)? latched_eow_i    : eow_i;
 // /_/   
       
 // accept 1 datum if pipeline works and upstream module is able to provide or latched is present
-assign stage_en[0] = process_en & ( receive_en | latched );
+assign stage_en[0] = process_en & receive_en;
 // clear first stage when pipeline works and upstream module is unable to provide data and no latched data present
-assign stage_clr[0] = process_en & ( ~receive_en & ~latched );
+assign stage_clr[0] = process_en & ~receive_en;
 
-logic signed [QUIRE_SIZE-1:0] shift_register;
 logic sign_r1, NaR_r1, zero_r1, RaZ_r1;
-logic [FRACTION_WIDTH:0] frac_hidden; // not -1 because of hidden bit
 
-assign frac_hidden = {1'b1, fraction_in};
+wire signed [8:0] shifted;
+signed_shift_lut 
+signed_shift_lut_inst (
+    .clk ( clk  ),
+    .in  ( { fraction_in[3], fraction_in[1], scale_in} ),
+    .out ( shifted )
+);
 
-always_ff @( posedge clk or negedge rst_n ) begin
+always_ff @( posedge clk ) begin
     if ( ~rst_n ) begin
-         staged[0]   <= 0;
-         sow[1]      <= 0;
-         eow[1]      <= 0;
-         shift_register <= 0;
-         sign_r1 <= 0;
-         NaR_r1 <= 0;
-         zero_r1 <= 0;
-         RaZ_r1 <= 0;
+         staged[0] <= 0;
+         sow[1]    <= 0;
+         eow[1]    <= 0;
+         shifted   <= 0;
+         sign_r1   <= 0;
+         NaR_r1    <= 0;
+         zero_r1   <= 0;
+         RaZ_r1    <= 0;
     end
     else begin
         if ( stage_en[0] ) begin
             staged[0] <= 1;
             sow[1]    <= sow[0];
             eow[1]    <= eow[0];
-             //handle negative scale
-            if (scale_in[SCALE_WIDTH-1]) begin // TODO !!
-                shift_register <= (frac_hidden >> (bpp_lsb - $signed(scale_in) ));
-            end
-            else begin
-                shift_register <= (frac_hidden << (bpp_lsb + $signed(scale_in)) );
-            end
-            //shift_register <= (frac_hidden << (bias_sf_mult + scale_in));
             sign_r1 <= sign_in;
             NaR_r1 <= NaR_in;
             zero_r1 <= zero_in;
@@ -214,26 +175,40 @@ always_ff @( posedge clk or negedge rst_n ) begin
     end
 end
 
-wire [8:0] test1;
-shift_module # (
-    .DATA_WIDTH_A ( 5 ),
-    .DATA_WIDTH_B ( 4 ),
-    .DATA_WIDTH_C ( 9 )    
-) shift_module_inst (
-    .a ( frac_hidden ),
-    .b ( scale_in    ),
-    .c ( test1 )
-);
 
-wire [8:0] test2;
-signed_shift_lut 
-signed_shift_lut_inst (
-    .clk ( clk  ),
-    .in  ( { fraction_in[3], fraction_in[1], scale_in} ),
-    .out ( test2 )
-);
-
-// $assert(test2 == shift_register);
+// always_ff @( posedge clk or negedge rst_n ) begin
+//     if ( ~rst_n ) begin
+//          staged[0]   <= 0;
+//          sow[1]      <= 0;
+//          eow[1]      <= 0;
+//          shift_register <= 0;
+//          sign_r1 <= 0;
+//          NaR_r1 <= 0;
+//          zero_r1 <= 0;
+//          RaZ_r1 <= 0;
+//     end
+//     else begin
+//         if ( stage_en[0] ) begin
+//             staged[0] <= 1;
+//             sow[1]    <= sow[0];
+//             eow[1]    <= eow[0];
+//              //handle negative scale
+//             if (scale_in[SCALE_WIDTH-1]) begin // TODO !!
+//                 shift_register <= (frac_hidden >> (bpp_lsb - $signed(scale_in) ));
+//             end
+//             else begin
+//                 shift_register <= (frac_hidden << (bpp_lsb + $signed(scale_in)) );
+//             end
+//             //shift_register <= (frac_hidden << (bias_sf_mult + scale_in));
+//             sign_r1 <= sign_in;
+//             NaR_r1 <= NaR_in;
+//             zero_r1 <= zero_in;
+//         end
+//         else if ( stage_clr[0] ) begin
+//             staged[0] <= 0;
+//         end
+//     end
+// end
 
 //    ___ 
 //   |__ \
@@ -247,7 +222,7 @@ assign stage_clr[1] = ~staged[0] & process_en;
 logic signed [QUIRE_SIZE-1:0] quire_r;
 logic  NaR_r2;
 
-always_ff @( posedge clk or negedge rst_n ) begin
+always_ff @( posedge clk ) begin
     if ( ~rst_n ) begin
          staged[1] <= 0;
          sow[2]    <= 0;
@@ -263,12 +238,12 @@ always_ff @( posedge clk or negedge rst_n ) begin
             if ( ~NaR_r1 ) begin
                 if ( ~zero_r1 ) begin
                     if ( sow[1] ) begin //sow
-                        quire_r   <= (sign_r1) ?  - shift_register :
-                                                  + shift_register ;
+                        quire_r   <= (sign_r1) ?  - shifted :
+                                                  + shifted ;
                     end
                     else begin
-                        quire_r   <= (sign_r1) ?  quire_r - shift_register :
-                                                  quire_r + shift_register ;
+                        quire_r   <= (sign_r1) ?  quire_r - shifted :
+                                                  quire_r + shifted ;
                     end
                 end
                 else begin
