@@ -214,13 +214,26 @@ always_ff @( posedge clk or negedge rst_n ) begin
     end
 end
 
-wire [8:0] test;
+wire [8:0] test1;
+shift_module # (
+    .DATA_WIDTH_A ( 5 );
+    .DATA_WIDTH_B ( 4 );
+    .DATA_WIDTH_C ( 9 );    
+) shift_module_inst (
+    .a ( frac_hidden ),
+    .b ( scale_in    ),
+    .c ( test1 )
+);
+
+wire [8:0] test2;
 signed_shift_lut 
 signed_shift_lut_inst (
     .clk ( clk  ),
     .in  ( { fraction_in[3], fraction_in[1], scale_in} ),
-    .out ( test )
+    .out ( test2 )
 );
+
+$assert(test2 == shift_register);
 
 //    ___ 
 //   |__ \
