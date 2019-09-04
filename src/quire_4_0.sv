@@ -78,28 +78,11 @@ logic receive_en;
 logic rtr_o_int;
 logic rts_o_int;
 
-// signal latched inputs
-logic latched;
-logic latched_zero_i;
-logic latched_NaR_i;
-logic latched_sign_i;
-logic latched_sow_i;
-logic latched_eow_i;
-logic [FRACTION_WIDTH-1:0] latched_fraction;
-logic signed [SCALE_WIDTH-1:0]  latched_scale;
-
-logic zero_in;
-logic NaR_in;
-logic sign_in;
-logic [FRACTION_WIDTH-1:0] fraction_in;
-logic signed [SCALE_WIDTH-1:0]  scale_in;
-
 // pipeline control signals
 localparam integer PIPELEN = 2;
 logic [PIPELEN-1:0] stage_en;
 logic [PIPELEN-1:0] stage_clr;
 logic [PIPELEN-1:0] staged;
-
 logic [PIPELEN:0] sow;
 logic [PIPELEN:0] eow;
 
@@ -134,9 +117,9 @@ assign rtr_o = rtr_o_int;
 //  / /  
 // /_/   
       
-// accept 1 datum if pipeline works and upstream module is able to provide or latched is present
+// accept 1 datum if pipeline works and upstream module is able to provide
 assign stage_en[0] = process_en & receive_en;
-// clear first stage when pipeline works and upstream module is unable to provide data and no latched data present
+// clear first stage when pipeline works and upstream module is unable to provide data
 assign stage_clr[0] = process_en & ~receive_en;
 
 logic sign_r1, NaR_r1, zero_r1, RaZ_r1;
@@ -145,7 +128,7 @@ wire signed [8:0] shifted;
 signed_shift_lut 
 signed_shift_lut_inst (
     .clk ( clk  ),
-    .in  ( { fraction_in[3], fraction_in[1], scale_in} ),
+    .in  ( { fraction_i[3], fraction_i[1], scale_i} ),
     .out ( shifted )
 );
 
@@ -164,9 +147,9 @@ always_ff @( posedge clk ) begin
             staged[0] <= 1;
             sow[1]    <= sow[0];
             eow[1]    <= eow[0];
-            sign_r1 <= sign_in;
-            NaR_r1 <= NaR_in;
-            zero_r1 <= zero_in;
+            sign_r1 <= sign_i;
+            NaR_r1 <= NaR_i;
+            zero_r1 <= zero_i;
         end
         else if ( stage_clr[0] ) begin
             staged[0] <= 0;
