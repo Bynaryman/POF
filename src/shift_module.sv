@@ -21,9 +21,9 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 module shift_module # (
-    parameter integer DATA_WIDTH_A = 4;
-    parameter integer DATA_WIDTH_B = 4;
-    parameter integer DATA_WIDTH_C = 4;    
+    parameter integer DATA_WIDTH_A = 4,
+    parameter integer DATA_WIDTH_B = 4,
+    parameter integer DATA_WIDTH_C = 4    
 )(
     input wire [DATA_WIDTH_A-1:0] a,
     input wire [DATA_WIDTH_B-1:0] b,
