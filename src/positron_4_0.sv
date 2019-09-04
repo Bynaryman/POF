@@ -108,7 +108,7 @@ localparam integer DELAY_READ_ROM = 2;
 localparam integer FRACTION_WIDTH_BEFORE_MULT = 2;
 localparam integer SCALE_WIDTH_BEFORE_MULT    = 3;
 localparam integer FRACTION_WIDTH_AFTER_MULT  = 4; // 2*2
-localparam integer SCALE_WIDTH_AFTER_MULT     = 3; // does not grow since es=0, and never overflow
+localparam integer SCALE_WIDTH_AFTER_MULT     = 4; // does not grow since es=0, and never overflow
 localparam integer QUIRE_WIDTH                = 19; // recompute TODO
 
 // signals
