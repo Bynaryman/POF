@@ -154,7 +154,6 @@ always_ff @( posedge clk ) begin
          staged[0] <= 0;
          sow[1]    <= 0;
          eow[1]    <= 0;
-         shifted   <= 0;
          sign_r1   <= 0;
          NaR_r1    <= 0;
          zero_r1   <= 0;
