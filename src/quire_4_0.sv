@@ -50,7 +50,7 @@ module quire_4_0 #
     output logic rts_o,
     output logic eow_o,
     output logic sow_o,
-    output logic [18:0] data_o,
+    output logic [19:0] data_o,
     output logic NaR_o,
     output logic sign_o,
     output logic zero_o
@@ -58,7 +58,7 @@ module quire_4_0 #
 );
 
 // localparam for size of internal registers
-localparam integer QUIRE_SIZE     = 19;
+localparam integer QUIRE_SIZE     = 20;
 localparam integer FRACTION_WIDTH = 4;
 localparam integer SCALE_WIDTH    = 4;
 
