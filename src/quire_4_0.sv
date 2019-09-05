@@ -227,6 +227,11 @@ endgenerate
 assign stage_en[1]  =  staged[0] & process_en;
 assign stage_clr[1] = ~staged[0] & process_en;
 
+wire [19:0] RaZ;
+assign RaZ = (sow[1])? 0 : accum;
+
+assign
+
 logic signed [QUIRE_SIZE-1:0] quire;
 logic  NaR_r2;
 always_ff @( posedge clk ) begin
@@ -243,7 +248,7 @@ always_ff @( posedge clk ) begin
             sow[2]    <= sow[1];
             eow[2]    <= eow[1];
             NaR_r2    <= NaR_r1; // TODO
-            quire     <= accum;
+            quire     <= (zero_r1)? RaZ : quire;
         end
         else if ( stage_clr[1] ) begin
             staged[1] <= 0;
