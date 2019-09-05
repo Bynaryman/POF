@@ -230,8 +230,6 @@ assign stage_clr[1] = ~staged[0] & process_en;
 wire [19:0] RaZ;
 assign RaZ = (sow[1])? 0 : accum;
 
-assign
-
 logic signed [QUIRE_SIZE-1:0] quire;
 logic  NaR_r2;
 always_ff @( posedge clk ) begin
