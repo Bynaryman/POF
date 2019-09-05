@@ -301,10 +301,10 @@ assign rts_o_int = staged[1];
 assign rts_o     = rts_o_int;
 assign eow_o     = eow[PIPELEN];
 assign sow_o     = sow[PIPELEN];
-assign data_o    = quire_r;
-assign sign_o    = quire_r[QUIRE_SIZE-1];
+assign data_o    = quire;
+assign sign_o    = quire[QUIRE_SIZE-1];
 assign NaR_o     = NaR_r2; // TODO
-assign zero_o    = ~|quire_r;
+assign zero_o    = ~|quire;
 
 endmodule
 `default_nettype wire
