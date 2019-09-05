@@ -202,8 +202,8 @@ end
 // /____/ 
 
 
-wire signed [19:0] accum;
-
+logic signed [19:0] accum;
+initial begin accum = 0;
 
 generate
 if ( USE_DSP48 == 1) begin
