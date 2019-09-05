@@ -404,7 +404,7 @@ posit_mult_4_0 posit_mult_inst (
 
 quire_4_0 #
 (
-    .USE_DSP48     ( 0            ), 
+    .USE_DSP48     ( 1            ), 
     .LOG_NB_ACCUM  ( LOG_NB_ACCUM ),
     .IS_PROD_ACCUM ( 1            )
 )
