@@ -24,7 +24,7 @@
 module signed_shift_lut (
     input  wire clk,
     input  wire [5:0] in,
-    output logic [11:0] out
+    output logic [8:0] out
 );
 
     always_ff @(posedge clk)  begin

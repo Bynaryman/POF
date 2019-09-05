@@ -203,12 +203,11 @@ end
 
 
 logic signed [19:0] accum;
-initial accum = 0;
 
 generate
 if ( USE_DSP48 == 1) begin
     addsub_dsp48 addsub_dsp48_inst (
-        .A   ( accum   ), // input wire [19 : 0] A
+        .A   ( quire   ), // input wire [19 : 0] A
         .B   ( shifted ), // input wire [8 : 0] B
         .ADD ( sign_r1 ), // input wire ADD
         .S   ( accum   )  // output wire [19 : 0] S
@@ -216,7 +215,7 @@ if ( USE_DSP48 == 1) begin
 end
 else begin
     addsub_logic addsub_logic (
-        .A   ( accum   ), // input wire [19 : 0] A
+        .A   ( quire   ), // input wire [19 : 0] A
         .B   ( shifted ), // input wire [8 : 0] B
         .ADD ( sign_r1 ), // input wire ADD
         .S   ( accum   )  // output wire [19 : 0] S
@@ -228,14 +227,14 @@ endgenerate
 assign stage_en[1]  =  staged[0] & process_en;
 assign stage_clr[1] = ~staged[0] & process_en;
 
-logic signed [QUIRE_SIZE-1:0] quire_r;
+logic signed [QUIRE_SIZE-1:0] quire;
 logic  NaR_r2;
 always_ff @( posedge clk ) begin
     if ( ~rst_n ) begin
          staged[1] <= 0;
          sow[2]    <= 0;
          eow[2]    <= 0;
-         quire_r   <= 0;
+         quire     <= 0;
          NaR_r2    <= 0; 
     end
     else begin
@@ -243,8 +242,8 @@ always_ff @( posedge clk ) begin
             staged[1] <= 1;
             sow[2]    <= sow[1];
             eow[2]    <= eow[1];
-            NaR_r2 <= NaR_r1; // TODO
-            quire_r <= accum;
+            NaR_r2    <= NaR_r1; // TODO
+            quire     <= accum;
         end
         else if ( stage_clr[1] ) begin
             staged[1] <= 0;

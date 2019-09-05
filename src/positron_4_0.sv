@@ -372,14 +372,14 @@ posit_mult_4_0 posit_mult_inst (
     // SLAVE SIDE
     
     // input posit 1
-    .fraction_i1 ( fraction_input        ),
+    .fraction_i1 ( fraction_input[0]     ),
     .scale_i1    ( scale_input           ),
     .NaR_i1      ( NaR_input             ),
     .zero_i1     ( zero_input            ),
     .sign_i1     ( sign_input            ),
    
     // input posit 2
-    .fraction_i2 ( fraction_weight       ),
+    .fraction_i2 ( fraction_weight[0]    ),
     .scale_i2    ( scale_weight          ),
     .NaR_i2      ( NaR_weight            ),
     .zero_i2     ( zero_weight           ),
