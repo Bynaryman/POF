@@ -202,7 +202,8 @@ end
 // /____/ 
 
 
-wire signed [19:0] accum = 0;
+wire signed [19:0] accum;
+
 
 generate
 if ( USE_DSP48 == 1) begin
@@ -242,24 +243,8 @@ always_ff @( posedge clk ) begin
             staged[1] <= 1;
             sow[2]    <= sow[1];
             eow[2]    <= eow[1];
-            if ( ~NaR_r1 ) begin
-                if ( ~zero_r1 ) begin
-                    if ( sow[1] ) begin //sow
-                        quire_r   <= (sign_r1) ?  - shifted :
-                                                  + shifted ;
-                    end
-                    else begin
-                        quire_r   <= (sign_r1) ?  quire_r - shifted :
-                                                  quire_r + shifted ;
-                    end
-                end
-                else begin
-                   if ( sow[1] ) begin // sow and zero
-                       quire_r <= 0;
-                   end
-                end
-            end
             NaR_r2 <= NaR_r1; // TODO
+            quire_r <= accum;
         end
         else if ( stage_clr[1] ) begin
             staged[1] <= 0;
