@@ -109,7 +109,7 @@ localparam integer FRACTION_WIDTH_BEFORE_MULT = 1;
 localparam integer SCALE_WIDTH_BEFORE_MULT    = 3;
 localparam integer FRACTION_WIDTH_AFTER_MULT  = 4; // 2*2
 localparam integer SCALE_WIDTH_AFTER_MULT     = 4; // does not grow since es=0, and never overflow
-localparam integer QUIRE_WIDTH                = 19; // recompute TODO
+localparam integer QUIRE_WIDTH                = (`GET_QUIRE_SIZE(POSIT_WIDTH, POSIT_ES, LOG_NB_ACCUM));
 
 // signals
 
