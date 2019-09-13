@@ -105,7 +105,7 @@ module positron_4_0#
 
 // local parameters
 localparam integer DELAY_READ_ROM = 2;
-localparam integer FRACTION_WIDTH_BEFORE_MULT = 2;
+localparam integer FRACTION_WIDTH_BEFORE_MULT = 1;
 localparam integer SCALE_WIDTH_BEFORE_MULT    = 3;
 localparam integer FRACTION_WIDTH_AFTER_MULT  = 4; // 2*2
 localparam integer SCALE_WIDTH_AFTER_MULT     = 4; // does not grow since es=0, and never overflow
@@ -136,10 +136,10 @@ logic [SCALE_WIDTH_BEFORE_MULT-1:0] scale_input, scale_weight;
 logic [FRACTION_WIDTH_BEFORE_MULT-1:0] fraction_input, fraction_weight;
 
 // posit mult
-logic posit_mult_ready;
-logic posit_mult_valid;
-logic posit_mult_eow_o;
-logic posit_mult_sow_o;
+// logic posit_mult_ready;
+// logic posit_mult_valid;
+// logic posit_mult_eow_o;
+// logic posit_mult_sow_o;
 logic [FRACTION_WIDTH_AFTER_MULT-1:0] posit_mult_fraction_o;
 logic [SCALE_WIDTH_AFTER_MULT-1:0] posit_mult_scale_o;
 logic posit_mult_NaR_o;  
