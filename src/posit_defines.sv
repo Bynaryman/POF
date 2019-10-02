@@ -42,14 +42,15 @@ package posit_defines;
             "0"+value : \
             "0"
 
+typedef enum  {NORMAL, AADD, AMULT} pd_type;
 
-    function [31:0] log2;
-        input reg [31:0] value;
-	begin
-	value = value-1;
-	for (log2=0; value>0; log2=log2+1)
-        	value = value>>1;
-      	end
-    endfunction
+function [31:0] log2;
+    input reg [31:0] value;
+begin
+value = value-1;
+for (log2=0; value>0; log2=log2+1)
+        value = value>>1;
+    end
+endfunction
 
 endpackage

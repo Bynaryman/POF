@@ -17,20 +17,17 @@
 // Revision 0.01 - File Created
 // Additional Comments: 
 //
-//  Not a generic module, aims to work with 16b posit
 //
-//
-//  - light axi stream control
 //  - input :
 //     - posit_word_i : a N bits posit word from a Posit<N,ES> 
-//       where N = C_WIDTH ; ES = C_ES
+//       where N = POSIT_WIDTH ; ES = POSIT_ES
 //  - output : 
 //     - sign         : 1 if neg 0 otherwise
-//     - inf          : boolean 1 if inifinite 0 otherwise
+//     - inf          : aka NaR, boolean 1 if not a real (inf et al) 0 otherwise
 //     - zero         : 1 if 0, 0 otherwise
 //     - scale        : ((2^2^es)^regime) * 2^exp = 2^((2^es)*regime + exp)
 //         => scale width = sup_rounding(log2(2^es * (nbits - 1) - 1))+1
-//     - fraction     : "matissa" part
+//     - fraction     : "mantissa" part
 //         => fraction width = N - ES - 1(sign bit) - 2(smallest regime size)
 //       
 //////////////////////////////////////////////////////////////////////////////////
@@ -38,7 +35,7 @@
 import posit_defines::*;
 
 module posit_data_extract #(
-    parameter integer POSIT_WIDTH = 16,
+    parameter integer POSIT_WIDTH = 8,
     parameter integer POSIT_ES    = 0
 )
 (

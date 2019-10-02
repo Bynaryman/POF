@@ -31,7 +31,7 @@ module LOD_N # (
 
 logic vld;
 localparam isPowerOfTwo = ~|(C_N&(C_N-1));
-localparam nbZeroToPad = (1<<($clog2(C_N))) - C_N;
+localparam nbOneToPad = (1<<($clog2(C_N))) - C_N;
 
 if (isPowerOfTwo) begin
     LOD #
@@ -53,7 +53,7 @@ else begin
         .C_S($clog2(C_N))
     )
     lod_inst (
-        .in  ( {in, {{nbZeroToPad}{1'b0}}}  ),
+        .in  ( {in, {{nbOneToPad}{1'b1}}}  ),
         .out ( out ),
         .vld ( vld ) 
     );
