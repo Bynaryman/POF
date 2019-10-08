@@ -35,7 +35,7 @@ module sticky_shifter #
     input  wire  [$clog2(MAX_STAGES):0] b,
     output logic [DATA_WIDTH-1+3:0]     c
 );
-   
+
     localparam integer S = MAX_STAGES;
     localparam integer N = DATA_WIDTH;
 
@@ -51,7 +51,7 @@ module sticky_shifter #
         end
     endgenerate
 
-    assign c = shift_stages[b-1];
+    assign c = shift_stages[b];
 
 endmodule
 `default_nettype wire

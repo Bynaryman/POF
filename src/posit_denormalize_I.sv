@@ -49,23 +49,17 @@ module posit_denormalize_I #(
     // master
     pd.master denormalized 
 
-    // master side
-    // output logic sign_o,
-    // output logic NaR_o,
-    // output logic zero_o,
-    // output logic [(`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, 0))-1:0] scale_o,
-    // output logic [(`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, 0))-1:0] fraction_o
 );
 
-
-localparam scale_width = (`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, 0));
+localparam integer scale_width    = get_scale_width(POSIT_WIDTH, POSIT_ES, NORMAL);
+localparam integer fraction_width = get_fraction_width(POSIT_WIDTH, POSIT_ES, NORMAL);
 
 // intermediate signals for interface output
 logic sign_o;
 logic NaR_o;
 logic zero_o;
-logic [denormalized.get_fraction_width-1:0] fraction_o;
-logic [denormalized.get_scale_width-1:0] scale_o;
+logic [fraction_width-1:0] fraction_o;
+logic [scale_width-1:0] scale_o;
 
 // #0  in regime or in cpt1 regime (1 is minus 1 see posit rules)
 logic [$clog2(POSIT_WIDTH)-1:0] k0;

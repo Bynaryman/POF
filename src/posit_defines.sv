@@ -19,30 +19,60 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+//`include "posit_macros.svh"
+
 package posit_defines;
 
-// prod_acc : +1 for signed +1 for overflow = +2 
-// +1 for signed scale                
-`define GET_SCALE_WIDTH( p_w, p_es, prod_acc ) \
-    (prod_acc) ? \
-        (($clog2(((2<<p_es) * (p_w-1))-1))+1) : \
-        (($clog2(((2<<p_es) * (p_w-1))-1)))
+typedef enum {
+    NORMAL, 
+    AADD,
+    AMULT, 
+    AQUIRE
+} pd_type;
+
+typedef enum {
+    RZERO,      // Round toward 0 <=> truncate
+    RNTE,       // Round to nearest, tie to even
+    RPLUSINF,   // Round toward +inf
+    RMININF,    // Round toward -inf
+    STOCHASTIC  // probabilistic rounding based on randomness
+} rounding_type;
+
+    function integer get_scale_width(input integer posit_width, input integer posit_es, input pd_type pdt);
+        case(pdt)
+            AADD: begin
+                return (($clog2(((2<<posit_es) * (posit_width-1))-1))+1);  // in case of overflow of mantissa : +1 ?
+            end
+            AMULT: begin
+                return (($clog2(((2<<posit_es) * (posit_width-1))-1))+1);  // addition of scales : +1 bit
+            end
     
-`define GET_FRACTION_WIDTH( p_w, p_es, prod_acc ) \
-    (prod_acc) ? \
-        (((p_w - p_es - 3)+1)*2) : \
-        (p_w - p_es - 3)
-
-`define GET_QUIRE_SIZE( p_w, p_es, log_nb_acc ) ((2**(p_es+2))*(p_w-2)+ 1 + log_nb_acc)
-
-`define GENVAR_TO_ASCII(value) \
-    ( value > 9 && value < 100 ) ? \
-        "00"+(256 * (value / 10)) + (value % 10) : \
-        ( value <= 9 && value >= 0 ) ? \
-            "0"+value : \
-            "0"
-
-typedef enum  {NORMAL, AADD, AMULT} pd_type;
+            NORMAL: begin
+                return (($clog2(((2<<posit_es) * (posit_width-1))-1)));
+            end
+            default: begin
+                return 0;
+            end  
+        endcase
+    endfunction
+    
+    function integer get_fraction_width(input integer posit_width, input integer posit_es, input pd_type pdt);
+        case(pdt)
+               AADD: begin
+                   return (posit_width - posit_es - 3); // for the GRS, the last bit will contin information about all lost LSBs ("it sticks")
+               end
+               AMULT: begin
+                   return(((posit_width - posit_es - 3)+1)*2);
+               end
+      
+               NORMAL: begin
+                   return (posit_width - posit_es - 3);
+               end
+               default: begin
+                   return 0;
+               end  
+           endcase
+    endfunction
 
 function [31:0] log2;
     input reg [31:0] value;
