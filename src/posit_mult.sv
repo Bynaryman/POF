@@ -1,3 +1,4 @@
+`default_nettype none
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: BSC
@@ -29,42 +30,42 @@ module posit_mult #
 (
 
     // System signals
-    input  clk,
-    input  rst_n,
+    input  wire clk,
+    input  wire rst_n,
     
     // SLAVE SIDE
     
     // control signals
-    output rtr_o,
-    input  rts_i,
-    input  sow_i,
-    input  eow_i,
+    output logic rtr_o,
+    input  wire rts_i,
+    input  wire sow_i,
+    input  wire eow_i,
     
     // input posit 1
-    input logic [(`GET_FRACTION_WIDTH( POSIT_WIDTH, POSIT_ES, 0 ))-1:0] fraction_i1,
-    input logic signed [(`GET_SCALE_WIDTH( POSIT_WIDTH, POSIT_ES, 0 ))-1:0] scale_i1,
-    input logic NaR_i1,
-    input logic zero_i1,
-    input logic sign_i1,
+    input wire [(get_fraction_width(POSIT_WIDTH,POSIT_ES,NORMAL))-1:0] fraction_i1,
+    input wire signed [(get_scale_width(POSIT_WIDTH,POSIT_ES,NORMAL))-1:0] scale_i1,
+    input wire NaR_i1,
+    input wire zero_i1,
+    input wire sign_i1,
    
     // input posit 2
-    input logic [(`GET_FRACTION_WIDTH( POSIT_WIDTH, POSIT_ES, 0 ))-1:0] fraction_i2,
-    input logic signed [(`GET_SCALE_WIDTH( POSIT_WIDTH, POSIT_ES, 0 ))-1:0] scale_i2,
-    input logic NaR_i2,
-    input logic zero_i2,
-    input logic sign_i2,
+    input wire [(get_fraction_width(POSIT_WIDTH,POSIT_ES,NORMAL))-1:0] fraction_i2,
+    input wire signed [(get_scale_width(POSIT_WIDTH,POSIT_ES,NORMAL))-1:0] scale_i2,
+    input wire NaR_i2,
+    input wire zero_i2,
+    input wire sign_i2,
     
     // MASTER SIDE
     
     // control signals
-    input  rtr_i,
-    output rts_o,
-    output eow_o,
-    output sow_o,
+    input  wire rtr_i,
+    output logic rts_o,
+    output logic eow_o,
+    output logic sow_o,
     
     // output posit
-    output logic [(`GET_FRACTION_WIDTH( POSIT_WIDTH, POSIT_ES, 1 ))-1:0] fraction_o,  // 2*(12+1)-1
-    output logic signed [(`GET_SCALE_WIDTH( POSIT_WIDTH, POSIT_ES, 1 ))-1:0] scale_o,
+    output logic [(get_fraction_width(POSIT_WIDTH,POSIT_ES,AMULT))-1:0] fraction_o,  // 2*(12+1)-1
+    output logic signed [(get_scale_width(POSIT_WIDTH,POSIT_ES,AMULT))-1:0] scale_o,
     output logic NaR_o,
     output logic sign_o,
     output logic zero_o
@@ -72,10 +73,10 @@ module posit_mult #
 );
 
 // localparam for register sizes
-localparam integer FRACTION_SIZE_IN  = (`GET_FRACTION_WIDTH( POSIT_WIDTH, POSIT_ES, 0 ));
-localparam integer FRACTION_SIZE_OUT = (`GET_FRACTION_WIDTH( POSIT_WIDTH, POSIT_ES, 1 ));
-localparam integer SCALE_SIZE_IN     = (`GET_SCALE_WIDTH( POSIT_WIDTH, POSIT_ES, 0 ));
-localparam integer SCALE_SIZE_OUT    = (`GET_SCALE_WIDTH( POSIT_WIDTH, POSIT_ES, 1 ));
+localparam integer FRACTION_SIZE_IN  = (get_fraction_width(POSIT_WIDTH,POSIT_ES,NORMAL));
+localparam integer FRACTION_SIZE_OUT = (get_fraction_width(POSIT_WIDTH,POSIT_ES,AMULT));
+localparam integer SCALE_SIZE_IN     = (get_scale_width(POSIT_WIDTH,POSIT_ES,NORMAL));
+localparam integer SCALE_SIZE_OUT    = (get_scale_width(POSIT_WIDTH,POSIT_ES,AMULT));
 
 // signal state control
 logic process_en;
@@ -277,3 +278,4 @@ assign NaR_o      = NaRout;
 
 
 endmodule
+`default_nettype wire

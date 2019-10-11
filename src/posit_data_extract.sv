@@ -55,12 +55,12 @@ module posit_data_extract #(
     output logic sign,
     output logic inf,
     output logic zero,
-    output logic [(`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, 0))-1:0] scale,
-    output logic [(`GET_FRACTION_WIDTH(POSIT_WIDTH, POSIT_ES, 0))-1:0] fraction
+    output logic [(get_scale_width(POSIT_WIDTH,POSIT_ES,NORMAL))-1:0] scale,
+    output logic [(get_fraction_width(POSIT_WIDTH, POSIT_ES, NORMAL))-1:0] fraction
 );
 
 
-localparam scale_width = (`GET_SCALE_WIDTH(POSIT_WIDTH, POSIT_ES, 0));
+localparam scale_width = (get_scale_width(POSIT_WIDTH,POSIT_ES,NORMAL));
 
 // #0 or #1 in regime (1 is minus 1 see posit rules)
 logic [$clog2(POSIT_WIDTH)-1:0] k0, k1;

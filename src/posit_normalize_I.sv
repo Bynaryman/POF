@@ -53,7 +53,7 @@ assign GRS = {
 // part x
 // compute the regime and exponent(if any)
 // and pack it into a big(2*POSIT_WIDTH+3) unsigned unrounded result
-logic [$clog2(POSIT_WIDTH)-1:0] k;
+logic [$clog2(POSIT_WIDTH):0] k;
 logic [2*POSIT_WIDTH-1:0] extended_regime_exp_fraction_GRS;
 if (POSIT_ES==0) begin
     assign k = (~denormalized.scale[scale_width-1])? 1+denormalized.scale : -denormalized.scale;
@@ -78,14 +78,16 @@ end
 // part x
 // clip into a POSIT_WIDTH-1
 logic [POSIT_WIDTH-2:0] unsigned_unrounded_result;
-logic [2*POSIT_WIDTH-1:0] extended_regime_exp_fraction_shifted;
+logic [2*POSIT_WIDTH-1+3:0] extended_regime_exp_fraction_shifted;
+//logic [$clog2(POSIT_WIDTH)+1:0] shift_amount;
+//assign shift_amount = (denormalized.scale==POSIT_WIDTH-1)? k : k+1;
 // assign extended_regime_exp_fraction_shifted = extended_regime_exp_fraction_GRS >> (k + 1);
 sticky_shifter #(
     .DATA_WIDTH ( 2*POSIT_WIDTH ),
-    .MAX_STAGES ( POSIT_WIDTH+1 )
+    .MAX_STAGES ( POSIT_WIDTH+2 )
 ) sticky_shifter_inst (
     .a ( extended_regime_exp_fraction_GRS     ),
-    .b ( {1'b0,k+1}                           ),
+    .b ( k+1                         ),
     .c ( extended_regime_exp_fraction_shifted )
 );
 assign unsigned_unrounded_result = extended_regime_exp_fraction_shifted[(POSIT_WIDTH-1+3)-:(POSIT_WIDTH-1)];

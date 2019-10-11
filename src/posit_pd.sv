@@ -17,7 +17,7 @@ interface pd #(
     // GRS
     logic guard;
     logic round;
-    logic sticky;
+    logic sticky;   
 
     modport slave  ( input scale, input fraction, input NaR, input sign, input zero, input guard, input round, input sticky);
     modport master ( output scale, output fraction, output NaR, output sign, output zero, output guard, output round, output sticky);

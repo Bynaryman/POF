@@ -62,11 +62,11 @@ logic [fraction_width-1:0] fraction_o;
 logic [scale_width-1:0] scale_o;
 
 // #0  in regime or in cpt1 regime (1 is minus 1 see posit rules)
-logic [$clog2(POSIT_WIDTH)-1:0] k0;
+logic [$clog2(POSIT_WIDTH-1)-1:0] k0;
 // unsigned input
 logic [POSIT_WIDTH-2:0] posit_word_i_u;
 // useed^k, max value of k can be 16 so 4 bits needed
-logic [$clog2(POSIT_WIDTH)-1:0] absolute_k;
+logic [$clog2(POSIT_WIDTH-1)-1:0] absolute_k;
 
 logic [POSIT_WIDTH-1:0] exp_and_frac;
 logic signed [scale_width-1:0] regime_scale;
@@ -136,7 +136,14 @@ endgenerate
 
 
 // compute frac
-assign fraction_o = exp_and_frac[POSIT_WIDTH-POSIT_ES-1:3];
+generate
+    if ((POSIT_WIDTH - POSIT_ES -3) > 0) begin  // if posit configuration allows mantissa to exist
+        assign fraction_o = exp_and_frac[POSIT_WIDTH-POSIT_ES-1:3];
+    end
+    else begin
+        assign fraction_o = 0;
+    end
+endgenerate
 
 // assign to interfaces pins
 assign denormalized.sign     = sign_o;

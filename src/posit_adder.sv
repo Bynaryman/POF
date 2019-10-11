@@ -46,12 +46,15 @@ module posit_adder # (
 // Generate block waiting for asserts
 if ( operand1.POSIT_WIDTH != operand2.POSIT_WIDTH ||
      operand1.POSIT_ES    != operand2.POSIT_ES    ||
-     operand1.PD_TYPE     != operand2.PD_TYPE )   $error("instanciation of adder with different operands configuration");
+     operand1.PD_TYPE     != operand2.PD_TYPE )   $fatal("instanciation of adder with different operands configuration");
+
+if ( (POSIT_WIDTH - POSIT_ES -3 ) < 1) $fatal("adder for posit w/o fraction still under devlopment");
 
 localparam integer scale_width_b    = get_scale_width(POSIT_WIDTH, POSIT_ES, NORMAL);
 localparam integer fraction_width_b = get_fraction_width(POSIT_WIDTH, POSIT_ES, NORMAL);
 localparam integer scale_width_a    = get_scale_width(POSIT_WIDTH, POSIT_ES, AADD);
 localparam integer fraction_width_a = get_fraction_width(POSIT_WIDTH, POSIT_ES, AADD);
+localparam integer MAX_SCALE        = $clog2(2**(2**POSIT_ES)**(POSIT_WIDTH-2));
 
 // part 1
 // comparison of inputs and muxes to determine the small(s) and large(l) operand 
@@ -60,6 +63,7 @@ logic signed [scale_width_b-1:0] sop_scale, lop_scale;
 logic [fraction_width_b-1:0] sop_fraction, lop_fraction;
 logic lzero, szero;
 logic lsign, ssign;
+logic saturation;
 always_comb begin
     if (operand1.scale > operand2.scale) begin
         op1_gt_op2 = 1'b1;
@@ -71,6 +75,7 @@ always_comb begin
         op1_gt_op2 = operand1.fraction >= operand2.fraction;
     end
 end
+assign saturation = (operand1.scale == MAX_SCALE) & (operand2.scale == MAX_SCALE); // if both exp are at max, they should clamp
 always_comb begin
     if (op1_gt_op2) begin
         sop_scale = operand2.scale;
@@ -140,8 +145,8 @@ LOD_N #(
     .out(hidden_pos)
 );
 
-logic signed [scale_width_a-1:0] final_scale;
-assign final_scale = (mantissa_overflow)? $signed(lop_scale + 1) : (~tmp_op_res[fraction_width_b-1+3+1]?  $signed(lop_scale - $signed(hidden_pos) + 1) : $signed(lop_scale));
+logic signed [scale_width_b-1:0] final_scale;
+assign final_scale = (mantissa_overflow)? $signed(lop_scale) + $unsigned(~saturation) : (~tmp_op_res[fraction_width_b-1+3+1]?  ($signed(lop_scale) - $signed(hidden_pos) + $signed(1'b1)) : $signed(lop_scale));
 
 //assign normalized_matissa_OVF = (mantissa_overflow)? tmp_op_res  : tmp_op_res << 1;
 assign normalized_op_res = tmp_op_res << (hidden_pos +1);
@@ -150,12 +155,12 @@ assign normalized_op_res = tmp_op_res << (hidden_pos +1);
 // TODO : que faire de GRS entrant
 assign result.guard  = normalized_op_res[$bits(normalized_op_res)-fraction_width_b-1];
 assign result.round  = normalized_op_res[$bits(normalized_op_res)-fraction_width_b-2];
-assign result.sticky = normalized_op_res[$bits(normalized_op_res)-fraction_width_b-3];
+assign result.sticky = |normalized_op_res[$bits(normalized_op_res)-fraction_width_b-3:0];
 assign result.NaR = operand1.NaR | operand2.NaR;
 assign result.sign = lsign;
 assign result.scale = final_scale;
 assign result.fraction = normalized_op_res[($bits(normalized_op_res)-1)-:fraction_width_b];
-assign result.zero = (operand1.zero & operand2.zero) | (hidden_pos >= $bits(sop_fraction_aligned_grs));
+assign result.zero = (operand1.zero & operand2.zero) | ~|tmp_op_res; //(hidden_pos >= $bits(sop_fraction_aligned_grs));
 endmodule
 
 module posit_adder_synth_tester ();
