@@ -5,7 +5,7 @@
 // 
 // Create Date: 12/10/2019 03:01:14 PM
 // Design Name: 
-// Module Name: positron_adder_noFMA_RNE 
+// Module Name: positron_layer_noFMA_RNE 
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-module positron_adder_noFMA_RNE #
+module positron_layer_noFMA_RNE #
 (
     parameter integer NB_UPSTREAM_POSITRON = 784,
     parameter WEIGHTS_BASE_PATH = "/home/lledoux/Desktop/PhD/ML/C/mnist-3lnn/hidden_weights/hidden_weights_",
