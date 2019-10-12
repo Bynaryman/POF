@@ -19,6 +19,8 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
+import posit_defines::*;
+
 module positron_layer_noFMA_RNE #
 (
     parameter integer NB_UPSTREAM_POSITRON = 784,
