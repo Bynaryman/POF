@@ -397,7 +397,7 @@ posit_mult_inst (
     // MASTER SIDE
     
     // control signals
-    .rtr_i       (                  ),
+    .rtr_i       ( add_ff_rtr_o          ),
     .rts_o       ( posit_mult_valid      ),
     .eow_o       ( posit_mult_eow_o      ),
     .sow_o       ( posit_mult_sow_o      ),
