@@ -54,7 +54,8 @@ assign GRS = {
 // compute the regime and exponent(if any)
 // and pack it into a big(2*POSIT_WIDTH+3) unsigned unrounded result
 logic [$clog2(POSIT_WIDTH):0] k;
-logic [2*POSIT_WIDTH-1:0] extended_regime_exp_fraction_GRS;
+localparam integer scratchpad_width = POSIT_WIDTH-1+1+POSIT_ES+fraction_width+3;
+logic [scratchpad_width-1:0] extended_regime_exp_fraction_GRS;
 if (POSIT_ES==0) begin
     assign k = (~denormalized.scale[scale_width-1])? 1+denormalized.scale : -denormalized.scale;
     assign extended_regime_exp_fraction_GRS = { {POSIT_WIDTH-1{~denormalized.scale[scale_width-1]}},  // regime
@@ -78,28 +79,34 @@ end
 // part x
 // clip into a POSIT_WIDTH-1
 logic [POSIT_WIDTH-2:0] unsigned_unrounded_result;
-logic [2*POSIT_WIDTH-1+3:0] extended_regime_exp_fraction_shifted;
+logic [scratchpad_width-1+3:0] extended_regime_exp_fraction_shifted;
 //logic [$clog2(POSIT_WIDTH)+1:0] shift_amount;
 //assign shift_amount = (denormalized.scale==POSIT_WIDTH-1)? k : k+1;
 // assign extended_regime_exp_fraction_shifted = extended_regime_exp_fraction_GRS >> (k + 1);
 sticky_shifter #(
-    .DATA_WIDTH ( 2*POSIT_WIDTH ),
-    .MAX_STAGES ( POSIT_WIDTH+2 )
+    .DATA_WIDTH ( scratchpad_width ),
+    .MAX_STAGES ( 2**($clog2(POSIT_WIDTH)+1) )
 ) sticky_shifter_inst (
     .a ( extended_regime_exp_fraction_GRS     ),
     .b ( k+1                         ),
     .c ( extended_regime_exp_fraction_shifted )
 );
-assign unsigned_unrounded_result = extended_regime_exp_fraction_shifted[(POSIT_WIDTH-1+3)-:(POSIT_WIDTH-1)];
-
+localparam integer backward_posit_offset = scratchpad_width-1+3-POSIT_WIDTH;
+localparam integer backward_posit_offset_G = backward_posit_offset-POSIT_WIDTH+1;
+//assign unsigned_unrounded_result = extended_regime_exp_fraction_shifted[(POSIT_WIDTH-1+3)-:(POSIT_WIDTH-1)];
+assign unsigned_unrounded_result = extended_regime_exp_fraction_shifted[backward_posit_offset-:(POSIT_WIDTH-1)];
 
 // part x
 // round the result, only RNTE for the moment
 logic [POSIT_WIDTH-2:0] unsigned_rounded_result;
 logic guard, round, sticky;
-assign guard  = extended_regime_exp_fraction_shifted[3];
-assign round  = extended_regime_exp_fraction_shifted[2];
-assign sticky = extended_regime_exp_fraction_shifted[1] | extended_regime_exp_fraction_shifted[0];
+// assign guard  = extended_regime_exp_fraction_shifted[3];
+// assign round  = extended_regime_exp_fraction_shifted[2];
+// assign sticky = extended_regime_exp_fraction_shifted[1] | extended_regime_exp_fraction_shifted[0];
+assign guard  = extended_regime_exp_fraction_shifted[backward_posit_offset_G];
+assign round  = extended_regime_exp_fraction_shifted[backward_posit_offset_G-1];
+assign sticky = |extended_regime_exp_fraction_shifted[backward_posit_offset_G-2:0];
+
 if (ROUNDING_MODE == RZERO) begin
     assign unsigned_rounded_result = unsigned_unrounded_result;
 end
