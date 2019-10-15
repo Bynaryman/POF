@@ -94,10 +94,25 @@ sticky_shifter #(
 localparam integer backward_posit_offset = scratchpad_width-1+3-POSIT_WIDTH;
 localparam integer backward_posit_offset_G = backward_posit_offset-POSIT_WIDTH+1;
 //assign unsigned_unrounded_result = extended_regime_exp_fraction_shifted[(POSIT_WIDTH-1+3)-:(POSIT_WIDTH-1)];
-assign unsigned_unrounded_result = extended_regime_exp_fraction_shifted[backward_posit_offset-:(POSIT_WIDTH-1)];
+
 
 // part x
-// round the result, only RNTE for the moment
+// inward projection for saturate arithmetic
+if ( PD_TYPE == AMULT ) begin // temporal to not brake for add
+    logic inward_proj_from_inf, inward_prof_from_zero;
+    localparam integer MAX_SCALE = (2**POSIT_ES)*(POSIT_WIDTH-2);
+    assign inward_proj_from_inf  = (denormalized.scale > MAX_SCALE);
+    assign inward_prof_from_zero = (denormalized.scale < -MAX_SCALE);
+    assign unsigned_unrounded_result = (inward_proj_from_inf) ? {POSIT_WIDTH-1{1'b1}} :
+        ((inward_prof_from_zero) ? {{POSIT_WIDTH-2{1'b0}}, 1'b1} :
+        extended_regime_exp_fraction_shifted[backward_posit_offset-:(POSIT_WIDTH-1)] );
+end
+else begin
+    assign unsigned_unrounded_result = extended_regime_exp_fraction_shifted[backward_posit_offset-:(POSIT_WIDTH-1)];
+end
+
+// part x
+// rounding based on the GRS triplet
 logic [POSIT_WIDTH-2:0] unsigned_rounded_result;
 logic guard, round, sticky;
 // assign guard  = extended_regime_exp_fraction_shifted[3];
