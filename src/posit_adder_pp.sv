@@ -29,6 +29,9 @@ module posit_adder_pp # (
     parameter integer POSIT_ES    = 0
 )
 (
+    // System
+    input wire clk,
+    input wire rst_n,
 
     // SLAVE SIDE
     
@@ -117,11 +120,11 @@ logic [PIPELEN:0] eow;
 
 // Shift condition: downstream module ready for receive, 
 // or current module not ready to send
-assign process_en = rtr_i | ~rts_o_int;
+assign process_en = result.rtr | ~rts_o_int;
 
 // Receive condition: current module ready for receive, 
 // and upstream module ready to send
-assign receive_en = rts_i & rtr_o_int;
+assign receive_en = operand1.rts & rtr_o_int;
 
 //    _____ __               
 //   / ___// /___ __   _____ 
@@ -179,7 +182,8 @@ always_ff @( posedge clk or negedge rst_n ) begin
        rtr_o_int <= process_en;
     end
 end
-assign rtr_o = rtr_o_int;
+assign operand1.rtr = rtr_o_int;
+assign operand2.rtr = rtr_o_int;
 
 //     ____  _            ___          
 //    / __ \(_)___  ___  / (_)___  ___ 
@@ -197,7 +201,7 @@ assign sign_in1     = (latched)? latched_sign_i1     : operand1.sign;
 assign NaR_in1      = (latched)? latched_NaR_i1      : operand1.NaR;
 assign zero_in1     = (latched)? latched_zero_i1     : operand1.zero;
 assign guard_in1    = (latched)? latched_guard_i1    : operand1.guard;
-assign round_in1    = (latched)? latched_round_i1    : operand1.round:
+assign round_in1    = (latched)? latched_round_i1    : operand1.round;
 assign sticky_in1   = (latched)? latched_sticky_i1   : operand1.sticky;
 assign fraction_in2 = (latched)? latched_fraction_i2 : operand2.fraction;
 assign scale_in2    = (latched)? latched_scale_i2    : operand2.scale;
@@ -291,7 +295,7 @@ logic lsign_pp1;
 logic NaR_in1_pp1;
 logic NaR_in2_pp1;
 logic zero_in1_pp1;
-logic zero_in2_pp10;
+logic zero_in2_pp1;
 always_ff @( posedge clk or negedge rst_n ) begin
     if ( ~rst_n ) begin
          staged[0]   <= 0;
@@ -383,31 +387,31 @@ assign result.fraction = normalized_op_res[($bits(normalized_op_res)-1)-:fractio
 assign result.zero = (zero_in1_pp1 & zero_in2_pp1) | ~|tmp_op_res; //(hidden_pos >= $bits(sop_fraction_aligned_grs));
 endmodule
 
-module posit_adder_synth_tester ();
+//module posit_adder_pp_synth_tester ();
 
-pd #( 
-    .POSIT_WIDTH ( 8 ),
-    .POSIT_ES    ( 1 ),
-    .PD_TYPE     ( NORMAL )
-) de2add_op1();
+//pd #( 
+//    .POSIT_WIDTH ( 8 ),
+//    .POSIT_ES    ( 1 ),
+//    .PD_TYPE     ( NORMAL )
+//) de2add_op1();
 
-pd #( 
-    .POSIT_WIDTH ( 8 ),
-    .POSIT_ES    ( 1 ),
-    .PD_TYPE     ( NORMAL )
-) de2add_op2();
+//pd #( 
+//    .POSIT_WIDTH ( 8 ),
+//    .POSIT_ES    ( 1 ),
+//    .PD_TYPE     ( NORMAL )
+//) de2add_op2();
 
-pd #( 
-    .POSIT_WIDTH ( 8 ),
-    .POSIT_ES    ( 1 ),
-    .PD_TYPE     ( AADD )
-) add2acc();
+//pd #( 
+//    .POSIT_WIDTH ( 8 ),
+//    .POSIT_ES    ( 1 ),
+//    .PD_TYPE     ( AADD )
+//) add2acc();
 
-posit_adder posit_adder_inst (
-    .operand1 ( de2add_op1 ),
-    .operand2 ( de2add_op2 ),
-    .result   ( add2acc    )
-);
+//posit_adder posit_adder_inst (
+//    .operand1 ( de2add_op1 ),
+//    .operand2 ( de2add_op2 ),
+//    .result   ( add2acc    )
+//);
 
-endmodule
+//endmodule
 `default_nettype wire

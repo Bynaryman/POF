@@ -32,7 +32,7 @@ module posit_normalize_I #(
 )
 (
     // slave side
-    pd.slave denormalized,
+    pd_control_if.slave_wo_c denormalized,
 
     // master
     output  wire [POSIT_WIDTH-1:0] posit_word_o

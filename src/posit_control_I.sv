@@ -29,4 +29,11 @@ interface pd_control_if #(
     modport master (  output rts, input rtr, output sow, output eow,
                       output scale, output fraction, output NaR, output sign,
                       output zero, output guard, output round, output sticky);
+                      
+    modport slave_wo_c  ( input scale, input fraction, input NaR, input sign,
+                        input zero, input guard, input round, input sticky );
+                    
+    modport master_wo_c ( output scale, output fraction, output NaR, output sign,
+                        output zero, output guard, output round, output sticky);
+                      
 endinterface

@@ -47,7 +47,7 @@ module posit_denormalize_I #(
     input  wire [POSIT_WIDTH-1:0] posit_word_i,
 
     // master
-    pd.master denormalized 
+    pd_control_if.master_wo_c denormalized 
 
 );
 
