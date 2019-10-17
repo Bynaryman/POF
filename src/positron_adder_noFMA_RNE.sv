@@ -543,12 +543,14 @@ posit_normalize_I # (
 //   / __/ | |/_/ __/ ___/ __ `/ ___/ __/
 //  / /____>  </ /_/ /  / /_/ / /__/ /_  
 // /_____/_/|_|\__/_/   \__,_/\___/\__/  
-                                      
+
+logic [POSIT_WIDTH-1:0]vdp_rst;
+assign vdp_rst = (posit_mult_sow_o) ? 0 : vdp;
 posit_denormalize_I # ( 
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    )
 ) add_denormalizer (
-    .posit_word_i ( vdp               ),
+    .posit_word_i ( vdp_rst           ),
     .denormalized ( extracted_accum_I )
 );
 
