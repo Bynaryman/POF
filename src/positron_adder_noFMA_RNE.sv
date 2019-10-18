@@ -160,7 +160,7 @@ logic posit_mult_sign_o;
 logic posit_mult_zero_o;
 
 // mult norm and rounding RNE
-pd #(
+pd_control_if #(
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    ),
     .PD_TYPE     ( AMULT       )
@@ -168,36 +168,26 @@ pd #(
 logic [POSIT_WIDTH-1:0] prod_rne;
 
 // extracted components after rounding 
-pd #(
+pd_control_if #(
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    ),
     .PD_TYPE     ( NORMAL      )
 ) extracted_mult_rne_I();
 
 // extracted components of accum
-pd #(
+pd_control_if #(
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    ),
     .PD_TYPE     ( NORMAL      )
 ) extracted_accum_I();
 
 // addition
-pd #(
+pd_control_if #(
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    ),
     .PD_TYPE     ( AADD        )
 ) accumulation_I();
 
-// FF the addition
-logic add_ff_rts_o;
-logic add_ff_eow_o;
-logic add_ff_sow_o;
-logic add_ff_rtr_o;
-pd #(
-    .POSIT_WIDTH ( POSIT_WIDTH ),
-    .POSIT_ES    ( POSIT_ES    ),
-    .PD_TYPE     ( AADD        )
-) accumulation_ff_I();
 
 // normalization and rounding of accum
 logic [POSIT_WIDTH-1:0] vdp;
@@ -397,7 +387,7 @@ posit_mult_inst (
     // MASTER SIDE
     
     // control signals
-    .rtr_i       ( add_ff_rtr_o          ),
+    .rtr_i       ( extracted_mult_rne_I.rtr ),
     .rts_o       ( posit_mult_valid      ),
     .eow_o       ( posit_mult_eow_o      ),
     .sow_o       ( posit_mult_sow_o      ),
@@ -460,66 +450,72 @@ posit_denormalize_I # (
 //  / ___ / /_/ / /_/ /  __/ /    
 // /_/  |_\__,_/\__,_/\___/_/     
 
-posit_adder #( 
+assign extracted_mult_rne_I.rts = posit_mult_valid;
+assign extracted_mult_rne_I.sow = posit_mult_sow_o;
+assign extracted_mult_rne_I.eow = posit_mult_eow_o;
+
+posit_adder_pp #( 
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    )
 ) posit_adder_inst (
+    .clk      ( clk                  ),
+    .rst_n    ( rst_n                ),
     .operand1 ( extracted_mult_rne_I ),
     .operand2 ( extracted_accum_I    ),
     .result   ( accumulation_I       )
 );
 
-logic [FRACTION_WIDTH_AFTER_ADD+SCALE_WIDTH_AFTER_ADD+6-1:0] in_ff;
-assign in_ff = {
-    accumulation_I.scale,
-    accumulation_I.fraction,
-    accumulation_I.NaR,
-    accumulation_I.sign,
-    accumulation_I.zero,
-    accumulation_I.guard,
-    accumulation_I.round,
-    accumulation_I.sticky
-};
-logic [FRACTION_WIDTH_AFTER_ADD+SCALE_WIDTH_AFTER_ADD+6-1:0] out_ff;
-pipeline #
-(
-    .DELAY      ( 1                       ),
-    .DATA_TYPE  ( logic [FRACTION_WIDTH_AFTER_ADD+SCALE_WIDTH_AFTER_ADD+6-1:0] )
-)
-add_accum_ff_inst(
-    // System signals
-    .clk    ( clk                    ),
-    .rst_n  ( rst_n                  ),
-    
-    // SLAVE SIDE
-    
-    // control signals
-   .rtr_o   ( add_ff_rtr_o     ),
-   .rts_i   ( posit_mult_valid ),
-   .sow_i   ( posit_mult_sow_o ),
-   .eow_i   ( posit_mult_eow_o ),
-    // data in
-    .data_i ( in_ff     ),
-    
-    // MASTER SIDE
-            
-    // control signals
-    .rtr_i  ( rtr_i        ),
-    .rts_o  ( add_ff_rts_o ),
-    .eow_o  ( add_ff_eow_o ),
-    .sow_o  ( add_ff_sow_o ),
-    // data out
-    .data_o ( out_ff       )
-);
-
-assign accumulation_ff_I.scale    = out_ff[($bits(out_ff)-1)-:SCALE_WIDTH_AFTER_ADD];
-assign accumulation_ff_I.fraction = out_ff[6+:FRACTION_WIDTH_AFTER_ADD];
-assign accumulation_ff_I.NaR      = out_ff[5];
-assign accumulation_ff_I.sign     = out_ff[4];
-assign accumulation_ff_I.zero     = out_ff[3];
-assign accumulation_ff_I.guard    = out_ff[2];
-assign accumulation_ff_I.round    = out_ff[1];
-assign accumulation_ff_I.sticky   = out_ff[0];
+// logic [FRACTION_WIDTH_AFTER_ADD+SCALE_WIDTH_AFTER_ADD+6-1:0] in_ff;
+// assign in_ff = {
+//     accumulation_I.scale,
+//     accumulation_I.fraction,
+//     accumulation_I.NaR,
+//     accumulation_I.sign,
+//     accumulation_I.zero,
+//     accumulation_I.guard,
+//     accumulation_I.round,
+//     accumulation_I.sticky
+// };
+// logic [FRACTION_WIDTH_AFTER_ADD+SCALE_WIDTH_AFTER_ADD+6-1:0] out_ff;
+// pipeline #
+// (
+//     .DELAY      ( 1                       ),
+//     .DATA_TYPE  ( logic [FRACTION_WIDTH_AFTER_ADD+SCALE_WIDTH_AFTER_ADD+6-1:0] )
+// )
+// add_accum_ff_inst(
+//     // System signals
+//     .clk    ( clk                    ),
+//     .rst_n  ( rst_n                  ),
+//     
+//     // SLAVE SIDE
+//     
+//     // control signals
+//    .rtr_o   ( add_ff_rtr_o     ),
+//    .rts_i   ( posit_mult_valid ),
+//    .sow_i   ( posit_mult_sow_o ),
+//    .eow_i   ( posit_mult_eow_o ),
+//     // data in
+//     .data_i ( in_ff     ),
+//     
+//     // MASTER SIDE
+//             
+//     // control signals
+//     .rtr_i  ( rtr_i        ),
+//     .rts_o  ( add_ff_rts_o ),
+//     .eow_o  ( add_ff_eow_o ),
+//     .sow_o  ( add_ff_sow_o ),
+//     // data out
+//     .data_o ( out_ff       )
+// );
+// 
+// assign accumulation_ff_I.scale    = out_ff[($bits(out_ff)-1)-:SCALE_WIDTH_AFTER_ADD];
+// assign accumulation_ff_I.fraction = out_ff[6+:FRACTION_WIDTH_AFTER_ADD];
+// assign accumulation_ff_I.NaR      = out_ff[5];
+// assign accumulation_ff_I.sign     = out_ff[4];
+// assign accumulation_ff_I.zero     = out_ff[3];
+// assign accumulation_ff_I.guard    = out_ff[2];
+// assign accumulation_ff_I.round    = out_ff[1];
+// assign accumulation_ff_I.sticky   = out_ff[0];
  
 //     ___       __    __   ____  _   ________
 //    /   | ____/ /___/ /  / __ \/ | / / ____/
@@ -534,7 +530,7 @@ posit_normalize_I # (
     .PD_TYPE       ( AADD        ),
     .ROUNDING_MODE ( RNTE        )
 ) add_normalizer (
-    .denormalized ( accumulation_ff_I ),
+    .denormalized ( accumulation_I    ),
     .posit_word_o ( vdp               )
 );
 
@@ -576,8 +572,9 @@ sigmoid_inst (
 //  / /  / / /_/ (__  ) /_/  __/ /    
 // /_/  /_/\__,_/____/\__/\___/_/     
 
-assign rts_o       = add_ff_eow_o & add_ff_rts_o;
-assign eow_o       = add_ff_eow_o;
+assign accumulation_I.rtr = rtr_i;
+assign rts_o       = accumulation_I.eow & accumulation_I.rts;
+assign eow_o       = accumulation_I.eow;
 assign posit_o     = sigmoid;
                                    
 endmodule
