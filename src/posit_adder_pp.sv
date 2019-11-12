@@ -111,7 +111,7 @@ logic sticky_in2;
 
 
 // pipeline control signals
-localparam integer PIPELEN = 1;
+localparam integer PIPELEN = 3;
 logic [PIPELEN-1:0] stage_en;
 logic [PIPELEN-1:0] stage_clr;
 logic [PIPELEN-1:0] staged;
@@ -224,6 +224,75 @@ assign stage_en[0] = process_en & ( receive_en | latched );
 // clear first stage when pipeline works and upstream module is unable to provide data and no latched data present
 assign stage_clr[0] = process_en & ( ~receive_en & ~latched );
 
+
+// signals_pp1
+logic signed [scale_width_b-1:0]  scale_in1_pp1;
+logic [fraction_width_b-1:0] fraction_in1_pp1;
+logic zero_in1_pp1;
+logic NaR_in1_pp1;
+logic sign_in1_pp1;
+logic guard_in1_pp1;
+logic round_in1_pp1;
+logic sticky_in1_pp1;
+logic signed [scale_width_b-1:0]  scale_in2_pp1;
+logic [fraction_width_b-1:0] fraction_in2_pp1;
+logic zero_in2_pp1;
+logic NaR_in2_pp1;
+logic sign_in2_pp1;
+logic guard_in2_pp1;
+logic round_in2_pp1;
+logic sticky_in2_pp1;
+
+always_ff @( posedge clk or negedge rst_n ) begin
+    if ( ~rst_n ) begin
+         staged[0]        <= 0;
+         sow[1]           <= 0;
+         eow[1]           <= 0;
+         fraction_in1_pp1 <= 0; 
+         scale_in1_pp1    <= 0; 
+         sign_in1_pp1     <= 0; 
+         NaR_in1_pp1      <= 0; 
+         zero_in1_pp1     <= 0; 
+         guard_in1_pp1    <= 0; 
+         round_in1_pp1    <= 0; 
+         sticky_in1_pp1   <= 0; 
+         fraction_in2_pp1 <= 0; 
+         scale_in2_pp1    <= 0; 
+         sign_in2_pp1     <= 0; 
+         NaR_in2_pp1      <= 0; 
+         zero_in2_pp1     <= 0; 
+         guard_in2_pp1    <= 0; 
+         round_in2_pp1    <= 0; 
+         sticky_in2_pp1   <= 0; 
+    end
+    else begin
+        if ( stage_en[0] ) begin
+            staged[0]    <= 1;
+            sow[1]       <= sow[0];
+            eow[1]       <= eow[0];
+            fraction_in1_pp1 <= fraction_in1; 
+            scale_in1_pp1    <= scale_in1   ; 
+            sign_in1_pp1     <= sign_in1    ; 
+            NaR_in1_pp1      <= NaR_in1     ; 
+            zero_in1_pp1     <= zero_in1    ; 
+            guard_in1_pp1    <= guard_in1   ; 
+            round_in1_pp1    <= round_in1   ; 
+            sticky_in1_pp1   <= sticky_in1  ; 
+            fraction_in2_pp1 <= fraction_in2; 
+            scale_in2_pp1    <= scale_in2   ; 
+            sign_in2_pp1     <= sign_in2    ; 
+            NaR_in2_pp1      <= NaR_in2     ; 
+            zero_in2_pp1     <= zero_in2    ; 
+            guard_in2_pp1    <= guard_in2   ; 
+            round_in2_pp1    <= round_in2   ; 
+            sticky_in2_pp1   <= sticky_in2  ; 
+        end
+        else if ( stage_clr[0] ) begin
+            staged[0] <= 0;
+        end
+    end
+end
+
 // part 1
 // comparison of inputs and muxes to determine the small(s) and large(l) operand 
 logic op1_gt_op2;
@@ -233,36 +302,36 @@ logic lzero, szero;
 logic lsign, ssign;
 logic saturation;
 always_comb begin
-    if (scale_in1 > scale_in2) begin
+    if (scale_in1_pp1 > scale_in2_pp1) begin
         op1_gt_op2 = 1'b1;
     end 
-    else if (scale_in1 < scale_in2) begin
+    else if (scale_in1_pp1 < scale_in2_pp1) begin
         op1_gt_op2 = 1'b0;
     end
     else begin  // scales are equal, compare mantissas
-        op1_gt_op2 = fraction_in1 >= fraction_in2;
+        op1_gt_op2 = fraction_in1_pp1 >= fraction_in2_pp1;
     end
 end
-assign saturation = (scale_in1 == MAX_SCALE) & (scale_in2 == MAX_SCALE); // if both exp are at max, they should clamp
+assign saturation = (scale_in1_pp1 == MAX_SCALE) & (scale_in2_pp1 == MAX_SCALE); // if both exp are at max, they should clamp
 always_comb begin
     if (op1_gt_op2) begin
-        sop_scale = scale_in2;
-        lop_scale = scale_in1;
-        sop_fraction = fraction_in2;
-        lop_fraction = fraction_in1;
-        lzero = zero_in1;
-        szero = zero_in2;
-        lsign = sign_in1;
-        ssign = sign_in2;
+        sop_scale = scale_in2_pp1;
+        lop_scale = scale_in1_pp1;
+        sop_fraction = fraction_in2_pp1;
+        lop_fraction = fraction_in1_pp1;
+        lzero = zero_in1_pp1;
+        szero = zero_in2_pp1;
+        lsign = sign_in1_pp1;
+        ssign = sign_in2_pp1;
     end else begin
-        sop_scale = scale_in1;
-        lop_scale = scale_in2;
-        sop_fraction = fraction_in1;
-        lop_fraction = fraction_in2;
-        lzero = zero_in2;
-        szero = zero_in1;
-        lsign = sign_in2;
-        ssign = sign_in1;
+        sop_scale = scale_in1_pp1;
+        lop_scale = scale_in2_pp1;
+        sop_fraction = fraction_in1_pp1;
+        lop_fraction = fraction_in2_pp1;
+        lzero = zero_in2_pp1;
+        szero = zero_in1_pp1;
+        lsign = sign_in2_pp1;
+        ssign = sign_in1_pp1;
     end
 end
 
@@ -285,51 +354,61 @@ sticky_shifter #(
     .c ( sop_fraction_aligned_grs )
 );
 
-// signals_pp1
-logic [fraction_width_b-1+3+1:0] sop_fraction_aligned_grs_pp1;
-logic op_pp1;
-logic [fraction_width_b-1+3+1:0] lop_pp1;
-logic signed [scale_width_b-1:0] lop_scale_pp1;
-logic saturation_pp1;
-logic lsign_pp1;
-logic NaR_in1_pp1;
-logic NaR_in2_pp1;
-logic zero_in1_pp1;
-logic zero_in2_pp1;
+
+//    ___ 
+//   |__ \
+//   __/ /
+//  / __/ 
+// /____/ 
+
+assign stage_en[1]  =  staged[0] & process_en;
+assign stage_clr[1] = ~staged[0] & process_en;
+
+// signals_pp2
+logic [fraction_width_b-1+3+1:0] sop_fraction_aligned_grs_pp2;
+logic op_pp2;
+logic [fraction_width_b-1+3+1:0] lop_pp2;
+logic signed [scale_width_b-1:0] lop_scale_pp2;
+logic saturation_pp2;
+logic lsign_pp2;
+logic NaR_in1_pp2;
+logic NaR_in2_pp2;
+logic zero_in1_pp2;
+logic zero_in2_pp2;
 always_ff @( posedge clk or negedge rst_n ) begin
     if ( ~rst_n ) begin
-         staged[0]   <= 0;
-         sow[1]      <= 0;
-         eow[1]      <= 0;
-         sop_fraction_aligned_grs_pp1 <= 0;
-         op_pp1 <= 0;
-         lop_pp1 <= 0;
-         lop_scale_pp1 <= 0;
-         saturation_pp1 <= 0;
-         lsign_pp1 <= 0;
-         NaR_in1_pp1 <= 0;
-         NaR_in2_pp1 <= 0;
-         zero_in1_pp1 <= 0;
-         zero_in2_pp1 <= 0;
+         staged[1]   <= 0;
+         sow[2]      <= 0;
+         eow[2]      <= 0;
+         sop_fraction_aligned_grs_pp2 <= 0;
+         op_pp2 <= 0;
+         lop_pp2 <= 0;
+         lop_scale_pp2 <= 0;
+         saturation_pp2 <= 0;
+         lsign_pp2 <= 0;
+         NaR_in1_pp2 <= 0;
+         NaR_in2_pp2 <= 0;
+         zero_in1_pp2 <= 0;
+         zero_in2_pp2 <= 0;
     end
     else begin
-        if ( stage_en[0] ) begin
-            staged[0] <= 1;
-            sow[1]    <= sow[0];
-            eow[1]    <= eow[0];
-            sop_fraction_aligned_grs_pp1 <= sop_fraction_aligned_grs;
-            op_pp1 <= sign_in1 ~^ sign_in2;
-            lop_pp1 <= {~lzero, lop_fraction, {3'b0}};
-            lop_scale_pp1 <= lop_scale;
-            saturation_pp1 <= saturation;
-            lsign_pp1 <= lsign;
-            NaR_in1_pp1 <= NaR_in1;
-            NaR_in2_pp1 <= NaR_in2;
-            zero_in1_pp1 <= zero_in1;
-            zero_in2_pp1 <= zero_in2;
+        if ( stage_en[1] ) begin
+            staged[1] <= 1;
+            sow[2]    <= sow[1];
+            eow[2]    <= eow[1];
+            sop_fraction_aligned_grs_pp2 <= sop_fraction_aligned_grs;
+            op_pp2 <= sign_in1_pp1 ~^ sign_in2_pp1;
+            lop_pp2 <= {~lzero, lop_fraction, {3'b0}};
+            lop_scale_pp2 <= lop_scale;
+            saturation_pp2 <= saturation;
+            lsign_pp2 <= lsign;
+            NaR_in1_pp2 <= NaR_in1_pp1;
+            NaR_in2_pp2 <= NaR_in2_pp1;
+            zero_in1_pp2 <= zero_in1_pp1;
+            zero_in2_pp2 <= zero_in2_pp1;
         end
-        else if ( stage_clr[0] ) begin
-            staged[0] <= 0;
+        else if ( stage_clr[1] ) begin
+            staged[1] <= 0;
         end
     end
 end
@@ -338,9 +417,9 @@ end
 // perform the operation depending on signs
 logic [fraction_width_b-1+3+1:0] sop, lop;
 logic [fraction_width_b-1+3+1+1:0] tmp_op_res; // +5 bits : grs hidden overflow
-assign lop = lop_pp1;
-assign sop = sop_fraction_aligned_grs_pp1;
-assign tmp_op_res = (op_pp1)?  lop + sop : lop - sop;
+assign lop = lop_pp2;
+assign sop = sop_fraction_aligned_grs_pp2;
+assign tmp_op_res = (op_pp2)?  lop + sop : lop - sop;
 
 // part 5
 // detect overflow of mantissa eventually adjust scale and mantissa
@@ -360,10 +439,62 @@ LOD_N #(
 );
 
 logic signed [scale_width_b-1:0] final_scale;
-assign final_scale = (mantissa_overflow)? $signed(lop_scale_pp1) + $unsigned(~saturation_pp1) : (~tmp_op_res[fraction_width_b-1+3+1]?  ($signed(lop_scale_pp1) - $signed(hidden_pos) + $signed(1'b1)) : $signed(lop_scale_pp1));
+assign final_scale = (mantissa_overflow)? $signed(lop_scale_pp2) + $unsigned(~saturation_pp2) : (~tmp_op_res[fraction_width_b-1+3+1]?  ($signed(lop_scale_pp2) - $signed(hidden_pos) + $signed(1'b1)) : $signed(lop_scale_pp2));
 
 //assign normalized_matissa_OVF = (mantissa_overflow)? tmp_op_res  : tmp_op_res << 1;
-assign normalized_op_res = tmp_op_res << (hidden_pos +1);
+assign normalized_op_res = tmp_op_res << (hidden_pos + 1);
+
+
+//    _____
+//   |__  /
+//    /_ <
+//  ___/ /
+// /____/
+
+assign stage_en[2]  =  staged[1] & process_en;
+assign stage_clr[2] = ~staged[1] & process_en;
+
+// signals_pp3
+logic [fraction_width_b-1+3+1+1:0] normalized_op_res_pp3;
+logic NaR_in1_pp3, NaR_in2_pp3;
+logic lsign_pp3;
+logic signed [scale_width_b-1:0] final_scale_pp3;
+logic zero_in1_pp3, zero_in2_pp3;
+logic [fraction_width_b-1+3+1+1:0] tmp_op_res_pp3;
+always_ff @( posedge clk or negedge rst_n ) begin
+    if ( ~rst_n ) begin
+         staged[2]             <= 0;
+         sow[3]                <= 0;
+         eow[3]                <= 0;
+         normalized_op_res_pp3 <= 0;
+         NaR_in1_pp3           <= 0;
+         NaR_in2_pp3           <= 0;
+         lsign_pp3             <= 0;
+         final_scale_pp3       <= 0;
+         zero_in1_pp3          <= 0;
+         zero_in2_pp3          <= 0;
+         tmp_op_res_pp3        <= 0;
+    end
+    else begin
+        if ( stage_en[2] ) begin
+            staged[2]             <= 1;
+            sow[3]                <= sow[2];
+            eow[3]                <= eow[2];
+            normalized_op_res_pp3 <= normalized_op_res;
+            NaR_in1_pp3           <= NaR_in1_pp2;
+            NaR_in2_pp3           <= NaR_in2_pp2;
+            lsign_pp3             <= lsign_pp2;
+            final_scale_pp3       <= final_scale;
+            zero_in1_pp3          <= zero_in1_pp2;
+            zero_in2_pp3          <= zero_in2_pp2;
+            tmp_op_res_pp3        <= tmp_op_res;
+        end
+        else if ( stage_clr[2] ) begin
+            staged[2] <= 0;
+        end
+    end
+end
+
 
 //                          __           
 //    ____ ___  ____ ______/ /____  _____
@@ -375,16 +506,14 @@ assign rts_o_int  = staged[PIPELEN-1];
 assign result.rts = rts_o_int;
 assign result.eow = eow[PIPELEN];
 assign result.sow = sow[PIPELEN];
-
-// TODO : que faire de GRS entrant
-assign result.guard  = normalized_op_res[$bits(normalized_op_res)-fraction_width_b-1];
-assign result.round  = normalized_op_res[$bits(normalized_op_res)-fraction_width_b-2];
-assign result.sticky = |normalized_op_res[$bits(normalized_op_res)-fraction_width_b-3:0];
-assign result.NaR = NaR_in1_pp1 | NaR_in2_pp1;
-assign result.sign = lsign_pp1;
-assign result.scale = final_scale;
-assign result.fraction = normalized_op_res[($bits(normalized_op_res)-1)-:fraction_width_b];
-assign result.zero = (zero_in1_pp1 & zero_in2_pp1) | ~|tmp_op_res; //(hidden_pos >= $bits(sop_fraction_aligned_grs));
+assign result.guard  = normalized_op_res_pp3[$bits(normalized_op_res)-fraction_width_b-1];
+assign result.round  = normalized_op_res_pp3[$bits(normalized_op_res)-fraction_width_b-2];
+assign result.sticky = |normalized_op_res_pp3[$bits(normalized_op_res)-fraction_width_b-3:0];
+assign result.NaR = NaR_in1_pp3 | NaR_in2_pp3;
+assign result.sign = lsign_pp3;
+assign result.scale = final_scale_pp3;
+assign result.fraction = normalized_op_res_pp3[($bits(normalized_op_res)-1)-:fraction_width_b];
+assign result.zero = (zero_in1_pp3 & zero_in2_pp3) | ~|tmp_op_res_pp3; //(hidden_pos >= $bits(sop_fraction_aligned_grs));
 endmodule
 
 //module posit_adder_pp_synth_tester ();
