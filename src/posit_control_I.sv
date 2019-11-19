@@ -1,6 +1,8 @@
+import posit_defines::*;
+
 interface pd_control_if #(
-    parameter integer POSIT_WIDTH = 16,
-    parameter integer POSIT_ES = 1,
+    parameter integer POSIT_WIDTH = 32,
+    parameter integer POSIT_ES = 2,
     parameter pd_type PD_TYPE = NORMAL
 )();
 

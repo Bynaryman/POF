@@ -26,7 +26,7 @@ module quire #
 (
     parameter integer POSIT_WIDTH = 8,
     parameter integer POSIT_ES = 0,
-    parameter integer LOG_NB_ACCUM = 15,
+    parameter integer LOG_NB_ACCUM = 10,
     parameter integer IS_PROD_ACCUM = 1
 )
 (

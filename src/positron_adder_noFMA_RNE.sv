@@ -190,7 +190,7 @@ pd_control_if #(
 
 
 // normalization and rounding of accum
-logic [POSIT_WIDTH-1:0] vdp;
+// logic [POSIT_WIDTH-1:0] vdp;
 
 // sigmoid
 logic [POSIT_WIDTH-1:0] sigmoid;
@@ -453,16 +453,24 @@ posit_denormalize_I # (
 assign extracted_mult_rne_I.rts = posit_mult_valid;
 assign extracted_mult_rne_I.sow = posit_mult_sow_o;
 assign extracted_mult_rne_I.eow = posit_mult_eow_o;
-
-posit_adder_pp #( 
-    .POSIT_WIDTH ( POSIT_WIDTH ),
-    .POSIT_ES    ( POSIT_ES    )
+logic accum_rts_o;
+logic accum_sow_o;
+logic accum_eow_o;
+logic [POSIT_WIDTH-1:0] accum_data_o;
+logic accum_rtr_i;
+posit_accum_rounding #( 
+    .POSIT_WIDTH   ( POSIT_WIDTH ),
+    .POSIT_ES      ( POSIT_ES    ),
+    .ROUNDIMG_MODE ( RMTE        )
 ) posit_adder_inst (
-    .clk      ( clk                  ),
-    .rst_n    ( rst_n                ),
-    .operand1 ( extracted_mult_rne_I ),
-    .operand2 ( extracted_accum_I    ),
-    .result   ( accumulation_I       )
+    .clk     ( clk                  ),
+    .rst_n   ( rst_n                ),
+    .operand ( extracted_mult_rne_I ),
+    .rts_o   ( accum_rts_o  ),
+    .sow_o   ( accum_sow_o  ),
+    .eow_o   ( accum_eow_o  ),
+    .data_o  ( accum_data_o ),
+    .rtr_i   ( accum_rtr_i  )
 );
 
 // logic [FRACTION_WIDTH_AFTER_ADD+SCALE_WIDTH_AFTER_ADD+6-1:0] in_ff;
@@ -524,31 +532,31 @@ posit_adder_pp #(
 // /_/  |_\__,_/\__,_/  /_/ |_/_/ |_/_____/   
 
 // rounding
-posit_normalize_I # ( 
-    .POSIT_WIDTH   ( POSIT_WIDTH ),
-    .POSIT_ES      ( POSIT_ES    ),
-    .PD_TYPE       ( AADD        ),
-    .ROUNDING_MODE ( RNTE        )
-) add_normalizer (
-    .denormalized ( accumulation_I    ),
-    .posit_word_o ( vdp               )
-);
-
-//     ______     __                  __ 
-//    / ____/  __/ /__________ ______/ /_
-//   / __/ | |/_/ __/ ___/ __ `/ ___/ __/
-//  / /____>  </ /_/ /  / /_/ / /__/ /_  
-// /_____/_/|_|\__/_/   \__,_/\___/\__/  
-
-logic [POSIT_WIDTH-1:0]vdp_rst;
-assign vdp_rst = (posit_mult_sow_o) ? 0 : vdp;
-posit_denormalize_I # ( 
-    .POSIT_WIDTH ( POSIT_WIDTH ),
-    .POSIT_ES    ( POSIT_ES    )
-) add_denormalizer (
-    .posit_word_i ( vdp_rst           ),
-    .denormalized ( extracted_accum_I )
-);
+// posit_normalize_I # ( 
+//     .POSIT_WIDTH   ( POSIT_WIDTH ),
+//     .POSIT_ES      ( POSIT_ES    ),
+//     .PD_TYPE       ( AADD        ),
+//     .ROUNDING_MODE ( RNTE        )
+// ) add_normalizer (
+//     .denormalized ( accumulation_I    ),
+//     .posit_word_o ( vdp               )
+// );
+// 
+// //     ______     __                  __ 
+// //    / ____/  __/ /__________ ______/ /_
+// //   / __/ | |/_/ __/ ___/ __ `/ ___/ __/
+// //  / /____>  </ /_/ /  / /_/ / /__/ /_  
+// // /_____/_/|_|\__/_/   \__,_/\___/\__/  
+// 
+// logic [POSIT_WIDTH-1:0]vdp_rst;
+// assign vdp_rst = (posit_mult_sow_o) ? 0 : vdp;
+// posit_denormalize_I # ( 
+//     .POSIT_WIDTH ( POSIT_WIDTH ),
+//     .POSIT_ES    ( POSIT_ES    )
+// ) add_denormalizer (
+//     .posit_word_i ( vdp_rst           ),
+//     .denormalized ( extracted_accum_I )
+// );
 
 //    _____ _                       _     __
 //   / ___/(_)___ _____ ___  ____  (_)___/ /
@@ -562,7 +570,7 @@ sigmoid #
     .POSIT_WIDTH ( POSIT_WIDTH )
 )
 sigmoid_inst (
-    .posit_i ( vdp     ),
+    .posit_i ( accum_data_o  ),
     .posit_o ( sigmoid )
 );
 
@@ -572,9 +580,9 @@ sigmoid_inst (
 //  / /  / / /_/ (__  ) /_/  __/ /    
 // /_/  /_/\__,_/____/\__/\___/_/     
 
-assign accumulation_I.rtr = rtr_i;
-assign rts_o       = accumulation_I.eow & accumulation_I.rts;
-assign eow_o       = accumulation_I.eow;
+assign accum_rtr_i = rtr_i;
+assign rts_o       = accumu_eow_o & accumu_rts_o;
+assign eow_o       = accumu_eow_o;
 assign posit_o     = sigmoid;
                                    
 endmodule

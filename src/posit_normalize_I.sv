@@ -25,8 +25,8 @@
 import posit_defines::*;
 
 module posit_normalize_I #(
-    parameter integer POSIT_WIDTH         = 32,
-    parameter integer POSIT_ES            = 2,
+    parameter integer POSIT_WIDTH         = 8,
+    parameter integer POSIT_ES            = 0,
     parameter pd_type PD_TYPE             = NORMAL,
     parameter rounding_type ROUNDING_MODE = RNTE
 )

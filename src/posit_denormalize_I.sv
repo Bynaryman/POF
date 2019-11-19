@@ -39,8 +39,8 @@
 import posit_defines::*;
 
 module posit_denormalize_I #(
-    parameter integer POSIT_WIDTH = 32,
-    parameter integer POSIT_ES    = 2
+    parameter integer POSIT_WIDTH = 8,
+    parameter integer POSIT_ES    = 0
 )
 (
     // slave side

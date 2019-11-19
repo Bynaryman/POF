@@ -1,8 +1,8 @@
 import posit_defines::*;
             
 interface pd #(
-    parameter integer POSIT_WIDTH = 16,
-    parameter integer POSIT_ES = 1,
+    parameter integer POSIT_WIDTH = 8,
+    parameter integer POSIT_ES = 0,
     parameter pd_type PD_TYPE = NORMAL
 )();
 

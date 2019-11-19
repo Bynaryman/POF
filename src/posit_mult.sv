@@ -24,8 +24,8 @@ import posit_defines::*;
 
 module posit_mult #
 (
-    parameter integer POSIT_WIDTH = 16,
-    parameter integer POSIT_ES = 1
+    parameter integer POSIT_WIDTH = 32,
+    parameter integer POSIT_ES = 2
 )
 (
 

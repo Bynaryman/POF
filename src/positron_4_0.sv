@@ -239,8 +239,8 @@ weights_ROM_inst (
 
 pipeline #
 (
-    .DATA_WIDTH ( POSIT_WIDTH    ),
-    .DELAY      ( DELAY_READ_ROM )
+    .DATA_TYPE ( logic[POSIT_WIDTH-1:0] ),
+    .DELAY     ( DELAY_READ_ROM         )
 )
 pipeline_inst(
     // System signals

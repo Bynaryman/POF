@@ -23,7 +23,7 @@
 import posit_defines::*;
 
 module posit_adder # (
-    parameter integer POSIT_WIDTH = 8,
+    parameter integer POSIT_WIDTH = 4,
     parameter integer POSIT_ES    = 0
 )
 (
@@ -167,19 +167,19 @@ module posit_adder_synth_tester ();
 
 pd #( 
     .POSIT_WIDTH ( 8 ),
-    .POSIT_ES    ( 1 ),
+    .POSIT_ES    ( 0 ),
     .PD_TYPE     ( NORMAL )
 ) de2add_op1();
 
 pd #( 
     .POSIT_WIDTH ( 8 ),
-    .POSIT_ES    ( 1 ),
+    .POSIT_ES    ( 0 ),
     .PD_TYPE     ( NORMAL )
 ) de2add_op2();
 
 pd #( 
     .POSIT_WIDTH ( 8 ),
-    .POSIT_ES    ( 1 ),
+    .POSIT_ES    ( 0 ),
     .PD_TYPE     ( AADD )
 ) add2acc();
 
