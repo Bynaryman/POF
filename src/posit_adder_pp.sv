@@ -12,7 +12,7 @@
 // Tool Versions: 
 // Description: 
 // 
-//    version of the adder with 1 stage
+//    version of the adder with 3 stages
 //
 // Dependencies: 
 // 
