@@ -123,7 +123,7 @@ localparam integer FRACTION_WIDTH_AFTER_MULT  = get_fraction_width(POSIT_WIDTH, 
 localparam integer SCALE_WIDTH_AFTER_MULT     = get_scale_width(POSIT_WIDTH, POSIT_ES, AMULT);
 localparam integer FRACTION_WIDTH_AFTER_ADD   = get_fraction_width(POSIT_WIDTH, POSIT_ES, AADD);
 localparam integer SCALE_WIDTH_AFTER_ADD      = get_scale_width(POSIT_WIDTH, POSIT_ES, AADD);
-
+localparam rounding_type ROUNDING_MODE        = RNTE;
 // signals
 
 // weights rom
@@ -421,10 +421,10 @@ assign prod_rne_I.sticky   = 1'b0;
 
 // rounding
 posit_normalize_I # ( 
-    .POSIT_WIDTH   ( POSIT_WIDTH ),
-    .POSIT_ES      ( POSIT_ES    ),
-    .PD_TYPE       ( AMULT       ),
-    .ROUNDING_MODE ( RNTE        )
+    .POSIT_WIDTH   ( POSIT_WIDTH   ),
+    .POSIT_ES      ( POSIT_ES      ),
+    .PD_TYPE       ( AMULT         ),
+    .ROUNDING_MODE ( ROUNDING_MODE )
 ) mult_normalizer (
     .denormalized ( prod_rne_I ),
     .posit_word_o ( prod_rne   )
@@ -459,9 +459,9 @@ logic accum_eow_o;
 logic [POSIT_WIDTH-1:0] accum_data_o;
 logic accum_rtr_i;
 posit_accum_rounding #( 
-    .POSIT_WIDTH   ( POSIT_WIDTH ),
-    .POSIT_ES      ( POSIT_ES    ),
-    .ROUNDIMG_MODE ( RMTE        )
+    .POSIT_WIDTH   ( POSIT_WIDTH   ),
+    .POSIT_ES      ( POSIT_ES      ),
+    .ROUNDING_MODE ( ROUNDING_MODE )
 ) posit_adder_inst (
     .clk     ( clk                  ),
     .rst_n   ( rst_n                ),
@@ -581,8 +581,8 @@ sigmoid_inst (
 // /_/  /_/\__,_/____/\__/\___/_/     
 
 assign accum_rtr_i = rtr_i;
-assign rts_o       = accumu_eow_o & accumu_rts_o;
-assign eow_o       = accumu_eow_o;
+assign rts_o       = accum_eow_o & accum_rts_o;
+assign eow_o       = accum_eow_o;
 assign posit_o     = sigmoid;
                                    
 endmodule

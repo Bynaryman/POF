@@ -194,15 +194,6 @@ logic sign_in1_pp1;
 logic guard_in1_pp1;
 logic round_in1_pp1;
 logic sticky_in1_pp1;
-// accum signals
-logic signed [scale_width_b-1:0]  scale_accum;
-logic [fraction_width_b-1:0] fraction_accum;
-logic zero_accum;
-logic NaR_accum;
-logic sign_accum;
-logic guard_accum;
-logic round_accum;
-logic sticky_accum;
 
 always_ff @( posedge clk or negedge rst_n ) begin
     if ( ~rst_n ) begin
@@ -244,7 +235,7 @@ always_comb begin
         scale_accum      = 0; 
         sign_accum       = 0; 
         NaR_accum        = 0; 
-        zero_accum       = 0; 
+        zero_accum       = 1; 
         guard_accum      = 0; 
         round_accum      = 0; 
         sticky_accum     = 0; 
@@ -365,15 +356,15 @@ always_ff @( posedge clk or negedge rst_n ) begin
             sow[2]    <= sow[1];
             eow[2]    <= eow[1];
             sop_fraction_aligned_grs_pp2 <= sop_fraction_aligned_grs;
-            op_pp2 <= sign_in1_pp1 ~^ sign_in2_pp1;
+            op_pp2 <= sign_in1_pp1 ~^ sign_accum;
             lop_pp2 <= {~lzero, lop_fraction, {3'b0}};
             lop_scale_pp2 <= lop_scale;
             saturation_pp2 <= saturation;
             lsign_pp2 <= lsign;
             NaR_in1_pp2 <= NaR_in1_pp1;
-            NaR_in2_pp2 <= NaR_in2_pp1;
+            NaR_in2_pp2 <= NaR_accum;
             zero_in1_pp2 <= zero_in1_pp1;
-            zero_in2_pp2 <= zero_in2_pp1;
+            zero_in2_pp2 <= zero_accum;
         end
         else if ( stage_clr[1] ) begin
             staged[1] <= 0;
@@ -419,13 +410,13 @@ assign normalized_op_res = tmp_op_res << (hidden_pos + 1);
 // /_/ |_/ /_/ /_____/  
                      
 logic [POSIT_WIDTH-1:0] posit_normalized;
-pd #( 
+pd_control_if #( 
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    ),
     .PD_TYPE     ( AADD        )
 ) normalized();
 
-pd #( 
+pd_control_if #( 
     .POSIT_WIDTH ( POSIT_WIDTH ),
     .POSIT_ES    ( POSIT_ES    ),
     .PD_TYPE     ( AADD        )
