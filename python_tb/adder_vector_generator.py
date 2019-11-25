@@ -11,7 +11,7 @@ OUTPUT_PATH = BASE_PATH + "adder_output_vector.txt"
 
 # set env
 NB_TEST = 10
-POSIT_WIDTH = 8
+POSIT_WIDTH = 6
 POSIT_ES = 0
 set_posit_env(POSIT_WIDTH, POSIT_ES)
 # A = Posit()
@@ -82,8 +82,8 @@ def generate_vectors_ALL_split(nsplit=4):
 
 def main():
     # generate_vectors_forloop(1000)
-    # generate_vectors_ALL()
-    generate_vectors_ALL_split(6)
+    generate_vectors_ALL()
+    #generate_vectors_ALL_split(6)
 
 if __name__ == '__main__':
     main()

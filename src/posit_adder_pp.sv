@@ -227,7 +227,7 @@ assign stage_clr[0] = process_en & ( ~receive_en & ~latched );
 
 // signals_pp1
 logic signed [scale_width_b-1:0]  scale_in1_pp1;
-logic [fraction_width_b-1:0] fraction_in1_pp1;
+logic  [fraction_width_b-1:0] fraction_in1_pp1;
 logic zero_in1_pp1;
 logic NaR_in1_pp1;
 logic sign_in1_pp1;
@@ -309,7 +309,7 @@ always_comb begin
         op1_gt_op2 = 1'b0;
     end
     else begin  // scales are equal, compare mantissas
-        op1_gt_op2 = fraction_in1_pp1 >= fraction_in2_pp1;
+        op1_gt_op2 = fraction_in1_pp1 > fraction_in2_pp1;
     end
 end
 assign saturation = (scale_in1_pp1 == MAX_SCALE) & (scale_in2_pp1 == MAX_SCALE); // if both exp are at max, they should clamp
