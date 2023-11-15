@@ -8,7 +8,9 @@
 
 ## Overview
 
-The Posit Operators Framework (POF) is a comprehensive library designed to facilitate arithmetic computations and neural network operations using the Posit numerical format on FPGAs. POF includes a comprehensive suite of hardware description language (HDL) files and corresponding software to execute and substantiate high-precision and efficient arithmetic computations, with a supportive focus on neural network applications. Through POF, it is possible to employ and test multi-layer perceptrons, described as 'positrons,' which capitalize on the Posit numerical format for superior accuracy and performance enhancements.
+The Posit Operators Framework (POF) is a comprehensive library designed to facilitate arithmetic computations and neural network operations using the Posit numerical format on FPGAs.
+POF includes a comprehensive suite of hardware description language (HDL) files and corresponding software to execute high-precision and efficient arithmetic computations, with a focus on neural network applications.
+Through POF, it is possible to employ and test multi-layer perceptrons, described as 'positrons,' which capitalize on the Posit numerical format for superior accuracy and performance enhancements.
 
 ## Project Structure
 
@@ -52,10 +54,11 @@ To get started with POF:
 2. Launch the FPGA development application and incorporate the `src` directory's source files for a new FPGA project setup.
 3. Proceed with the project synthesis and configure your target FPGA device with the resultant bitstream.
 4. Assure that the bitstream flashed onto the FPGA includes the Posit neuron weights from the `weights` directory.
-5. Utilize the PYNQ platform to run the Python scripts located in `pynq_soft`, which engage in Posit-based operations.
+5. Utilize the PYNQ platform to run the Python scripts located in `pynq_soft`, which ultimately runs mnist inference with posit perceptron.
 
+   
 ## Authors
-For any inquiries concerning the Posit Operators Framework, the authors are available for contact:
+For any questions concerning the Posit Operators Framework, the authors are available for contact:
 
 - Me / Bynaryman / Louis Ledoux [@Bynaryman](https://github.com/Bynaryman)
 - Marc Casas [@Marccg1](https://github.com/Marccg1)
