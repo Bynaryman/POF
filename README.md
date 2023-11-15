@@ -7,7 +7,8 @@
 4. [Authors](#authors)
 
 ## Overview
-The Posit Operators Framework (POF) is an advanced library intended to empower arithmetic calculations and neural network operations using Posit notation on FPGA technology. POF includes a comprehensive suite of hardware description language (HDL) files and corresponding software to execute and substantiate high-precision and efficient arithmetic computations, with a supportive focus on neural network applications. Through POF, it is possible to employ and test multi-layer perceptrons, described as 'positrons,' which capitalize on the Posit numerical format for superior accuracy and performance enhancements.
+
+The Posit Operators Framework (POF) is a comprehensive library designed to facilitate arithmetic computations and neural network operations using the Posit numerical format on FPGAs. POF includes a comprehensive suite of hardware description language (HDL) files and corresponding software to execute and substantiate high-precision and efficient arithmetic computations, with a supportive focus on neural network applications. Through POF, it is possible to employ and test multi-layer perceptrons, described as 'positrons,' which capitalize on the Posit numerical format for superior accuracy and performance enhancements.
 
 ## Project Structure
 
@@ -60,4 +61,3 @@ For any inquiries concerning the Posit Operators Framework, the authors are avai
 - Marc Casas [@Marccg1](https://github.com/Marccg1)
 
 Please consider reaching out to the authors regarding contribution proposals, usage queries, or academic collaborations.
-
